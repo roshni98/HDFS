@@ -1,0 +1,64 @@
+version: '3.7'
+services:
+  master:
+    image: roshni/distributed_hdfs
+    volumes:
+      - ./hadoop:/usr/local/hadoop-3.2.1/etc/hadoop
+    ports:
+      - "9870:9870"
+    networks:
+      - hadoopnet
+    environment:
+      - HDFS_NAMENODE_USER=root
+      - HDFS_DATANODE_USER=root
+      - HDFS_SECONDARYNAMENODE_USER=root
+    command: hdfs namenode -format
+    tty: true
+    entrypoint: /usr/local/hadoop-3.2.1/etc/hadoop/run.sh
+    depends_on:
+      - node1
+      - node2
+      - node3
+  node1:
+    image: roshni/distributed_hdfs
+    volumes:
+      - ./hadoop:/usr/local/hadoop-3.2.1/etc/hadoop
+    networks:
+      - hadoopnet
+    tty: true
+    environment:
+      - HDFS_NAMENODE_USER=root
+      - HDFS_DATANODE_USER=root
+      - HDFS_SECONDARYNAMENODE_USER=root
+    ports:
+      - "9864:9864"
+  # remove node2 & node3 and update workers file with new ip addresses
+  node2:
+    image: roshni/distributed_hdfs
+    volumes:
+      - ./hadoop:/usr/local/hadoop-3.2.1/etc/hadoop
+    networks:
+      - hadoopnet
+    tty: true
+    environment:
+      - HDFS_NAMENODE_USER=root
+      - HDFS_DATANODE_USER=root
+      - HDFS_SECONDARYNAMENODE_USER=root
+    ports:
+      - "9865:9864"
+  node3:
+    image: roshni/distributed_hdfs
+    volumes:
+      - ./hadoop:/usr/local/hadoop-3.2.1/etc/hadoop
+    networks:
+      - hadoopnet
+    tty: true
+    environment:
+      - HDFS_NAMENODE_USER=root
+      - HDFS_DATANODE_USER=root
+      - HDFS_SECONDARYNAMENODE_USER=root
+    ports:
+      - "9866:9864"
+networks:
+  hadoopnet:
+    name: hadoopnet
