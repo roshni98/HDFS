@@ -24,36 +24,36 @@ public class Client {
         // nn_details contain NN details in the format Server;IP;Port
     }
 
-    // public IDataNode GetDNStub(String Name, String IP, int Port) {
-    // while (true) {
-    // try {
-    // Registry registry = LocateRegistry.getRegistry(IP, Port);
-    // // IDataNode stub = (IDataNode) registry.lookup(Name);
-    // // return stub;
-    // } catch (Exception e) {
-    // continue;
-    // }
-    // }
-    // }
+    public IDataNode GetDNStub(String Name, String IP, int Port) {
+        while (true) {
+            try {
+                Registry registry = LocateRegistry.getRegistry(IP, Port);
+                IDataNode stub = (IDataNode) registry.lookup(Name);
+                return stub;
+            } catch (Exception e) {
+                continue;
+            }
+        }
+    }
 
-    // public INameNode GetNNStub(String Name, String IP, int Port) {
-    // while (true) {
-    // try {
-    // Registry registry = LocateRegistry.getRegistry(IP, Port);
-    // // INameNode stub = (INameNode) registry.lookup(Name);
-    // // return stub;
-    // } catch (Exception e) {
-    // continue;
-    // }
-    // }
-    // }
+    public INameNode GetNNStub(String Name, String IP, int Port) {
+        while (true) {
+            try {
+                Registry registry = LocateRegistry.getRegistry(IP, Port);
+                INameNode stub = (INameNode) registry.lookup(Name);
+                return stub;
+            } catch (Exception e) {
+                continue;
+            }
+        }
+    }
 
     public void PutFile(String Filename) // Put File
     {
         System.out.println("Going to put file" + Filename);
         BufferedInputStream bis;
         try {
-            // bis = new BufferedInputStream(new FileInputStream(File));
+            bis = new BufferedInputStream(new FileInputStream(File));
         } catch (Exception e) {
             System.out.println("File not found !!!");
             return;

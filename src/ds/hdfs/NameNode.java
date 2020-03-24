@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -28,61 +29,61 @@ import com.google.protobuf.*;
 
 import ds.hdfs.hdfsformat.*;
 
-public class NameNode implements INameNode{
+public class NameNode implements INameNode {
 
 	protected Registry serverRegistry;
+	String addr;
+	int port;
+	String name;
 
-	public NameNode(String addr,int p, String nn)
-	{
-		ip = addr;
-		port = p;
-		name = nn;
+	/* Constructor for a NameNode Object */
+	public NameNode(String addr, int p, String nn) {
+		this.addr = addr;
+		this.port = p;
+		this.name = nn;
 	}
 
-	public static class DataNode
-	{
+	/* Class that represents information about DataNode object for Hearbeat */
+	public static class DataNode {
 		String ip;
 		int port;
 		String serverName;
-		public DataNode(String addr,int p,String sname)
-		{
+
+		public DataNode(String addr, int p, String sname) {
 			ip = addr;
 			port = p;
 			serverName = sname;
 		}
 	}
 
-	public static class FileInfo
-	{
+	/*
+	 * Class that represents information about File stored on a particular DataNode
+	 * object
+	 */
+	public static class FileInfo {
 		String filename;
 		int filehandle;
 		boolean writemode;
 		ArrayList<Integer> Chunks;
-		public FileInfo(String name, int handle, boolean option)
-		{
+
+		public FileInfo(String name, int handle, boolean option) {
 			filename = name;
 			filehandle = handle;
 			writemode = option;
 			Chunks = new ArrayList<Integer>();
 		}
 	}
-	/* Method to open a file given file name with read-write flag*/
+	/* Method to open a file given file name with read-write flag */
 
-	boolean findInFilelist(int fhandle)
-	{
+	boolean findInFilelist(int fhandle) {
 	}
 
-	public void printFilelist()
-	{
+	public void printFilelist() {
 	}
 
-	public byte[] openFile(byte[] inp) throws RemoteException
-	{
-		try
-		{
-		}
-		catch (Exception e)
-		{
+	public byte[] openFile(byte[] inp) throws RemoteException {
+		try {
+		} catch (Exception e) {
 			System.err.println("Error at " + this.getClass() + e.toString());
 			e.printStackTrace();
 			response.setStatus(-1);
@@ -90,13 +91,9 @@ public class NameNode implements INameNode{
 		return response.toByteArray();
 	}
 
-	public byte[] closeFile(byte[] inp ) throws RemoteException
-	{
-		try
-		{
-		}
-		catch(Exception e)
-		{
+	public byte[] closeFile(byte[] inp) throws RemoteException {
+		try {
+		} catch (Exception e) {
 			System.err.println("Error at closefileRequest " + e.toString());
 			e.printStackTrace();
 			response.setStatus(-1);
@@ -105,29 +102,20 @@ public class NameNode implements INameNode{
 		return response.build().toByteArray();
 	}
 
-	public byte[] getBlockLocations(byte[] inp ) throws RemoteException
-	{
-		try
-		{
-		}
-		catch(Exception e)
-		{
-			System.err.println("Error at getBlockLocations "+ e.toString());
+	public byte[] getBlockLocations(byte[] inp) throws RemoteException {
+		try {
+		} catch (Exception e) {
+			System.err.println("Error at getBlockLocations " + e.toString());
 			e.printStackTrace();
 			response.setStatus(-1);
 		}
 		return response.build().toByteArray();
 	}
 
-
-	public byte[] assignBlock(byte[] inp ) throws RemoteException
-	{
-		try
-		{
-		}
-		catch(Exception e)
-		{
-			System.err.println("Error at AssignBlock "+ e.toString());
+	public byte[] assignBlock(byte[] inp) throws RemoteException {
+		try {
+		} catch (Exception e) {
+			System.err.println("Error at AssignBlock " + e.toString());
 			e.printStackTrace();
 			response.setStatus(-1);
 		}
@@ -135,14 +123,10 @@ public class NameNode implements INameNode{
 		return response.build().toByteArray();
 	}
 
-
-	public byte[] list(byte[] inp ) throws RemoteException
-	{
-		try
-		{
-		}catch(Exception e)
-		{
-			System.err.println("Error at list "+ e.toString());
+	public byte[] list(byte[] inp) throws RemoteException {
+		try {
+		} catch (Exception e) {
+			System.err.println("Error at list " + e.toString());
 			e.printStackTrace();
 			response.setStatus(-1);
 		}
@@ -151,34 +135,40 @@ public class NameNode implements INameNode{
 
 	// Datanode <-> Namenode interaction methods
 
-	public byte[] blockReport(byte[] inp ) throws RemoteException
-	{
-		try
-		{
-		}
-		catch(Exception e)
-		{
-			System.err.println("Error at blockReport "+ e.toString());
+	public byte[] blockReport(byte[] inp) throws RemoteException {
+		try {
+		} catch (Exception e) {
+			System.err.println("Error at blockReport " + e.toString());
 			e.printStackTrace();
 			response.addStatus(-1);
 		}
 		return response.build().toByteArray();
 	}
 
-
-
-	public byte[] heartBeat(byte[] inp) throws RemoteException
-	{
+	public byte[] heartBeat(byte[] inp) throws RemoteException {
 		return response.build().toByteArray();
 	}
 
-	public void printMsg(String msg)
-	{
+	public void printMsg(String msg) {
 		System.out.println(msg);
 	}
 
-	public static void main(String[] args) throws InterruptedException, NumberFormatException, IOException
-	{
+	public static void main(String[] args) throws InterruptedException, NumberFormatException, IOException {
+
+		// creates a new reader for the nn_config file to retrieve IP addr and port
+		BufferedReader bf = new BufferedReader(new FileReader("nn_config.txt"));
+
+		// skips the line for the format of the file
+		bf.readLine();
+
+		String[] details = bf.readLine().split(";");
+		String name = details[0];
+		String addr = details[1];
+		int port = Integer.parseInt(details[2]);
+
+		// create a new NameNode object
+		NameNode nn = new NameNode(addr, port, name);
+
 	}
 
 }
