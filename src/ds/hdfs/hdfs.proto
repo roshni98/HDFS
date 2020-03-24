@@ -2,4 +2,3 @@ package hdfs;
 
 option java_package = "ds.hdfs";
 option java_outer_classname = "SOMETHING";
-
