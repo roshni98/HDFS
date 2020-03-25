@@ -23,24 +23,34 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.sql.Timestamp;
 
 import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.*;
 
-import ds.hdfs.hdfsformat.*;
 
-public class NameNode implements INameNode {
+// import com.google.protobuf.InvalidProtocolBufferException;
+// import com.google.protobuf.*;
 
-	protected Registry serverRegistry;
-	String addr;
-	int port;
+// import ds.hdfs.hdfsformat.*;
+
+
+public class NameNode implements INameNode{
 	String name;
+	String ip; 
+	int port;
+	protected Registry serverRegistry;
+	DataNode[] dataNodes;
+	long[] heartbeatTimestamp;
 
-	/* Constructor for a NameNode Object */
-	public NameNode(String addr, int p, String nn) {
-		this.addr = addr;
+	public NameNode(String addr,int p, String nn) throws RemoteException
+	{
+		this.ip = addr;
 		this.port = p;
-		this.name = nn;
+		name = nn;
+		serverRegistry = LocateRegistry.getRegistry();
+		dataNodes = new DataNode[3];
+		heartbeatTimestamp = new long[3];
+
 	}
 
 	/* Class that represents information about DataNode object for Hearbeat */
@@ -75,7 +85,10 @@ public class NameNode implements INameNode {
 	}
 	/* Method to open a file given file name with read-write flag */
 
-	boolean findInFilelist(int fhandle) {
+	boolean findInFilelist(int fhandle)
+	{
+		return true;
+
 	}
 
 	public void printFilelist() {
@@ -86,9 +99,10 @@ public class NameNode implements INameNode {
 		} catch (Exception e) {
 			System.err.println("Error at " + this.getClass() + e.toString());
 			e.printStackTrace();
-			response.setStatus(-1);
+			// response.setStatus(-1);
 		}
-		return response.toByteArray();
+		return null;
+		// return response.toByteArray();
 	}
 
 	public byte[] closeFile(byte[] inp) throws RemoteException {
@@ -96,10 +110,10 @@ public class NameNode implements INameNode {
 		} catch (Exception e) {
 			System.err.println("Error at closefileRequest " + e.toString());
 			e.printStackTrace();
-			response.setStatus(-1);
+			// response.setStatus(-1);
 		}
-
-		return response.build().toByteArray();
+		return null;
+		// return response.build().toByteArray();
 	}
 
 	public byte[] getBlockLocations(byte[] inp) throws RemoteException {
@@ -107,9 +121,10 @@ public class NameNode implements INameNode {
 		} catch (Exception e) {
 			System.err.println("Error at getBlockLocations " + e.toString());
 			e.printStackTrace();
-			response.setStatus(-1);
+			// response.setStatus(-1);
 		}
-		return response.build().toByteArray();
+		return null;
+		// return response.build().toByteArray();
 	}
 
 	public byte[] assignBlock(byte[] inp) throws RemoteException {
@@ -117,10 +132,10 @@ public class NameNode implements INameNode {
 		} catch (Exception e) {
 			System.err.println("Error at AssignBlock " + e.toString());
 			e.printStackTrace();
-			response.setStatus(-1);
+			// response.setStatus(-1);
 		}
-
-		return response.build().toByteArray();
+		return null;
+		// return response.build().toByteArray();
 	}
 
 	public byte[] list(byte[] inp) throws RemoteException {
@@ -128,9 +143,10 @@ public class NameNode implements INameNode {
 		} catch (Exception e) {
 			System.err.println("Error at list " + e.toString());
 			e.printStackTrace();
-			response.setStatus(-1);
+			// response.setStatus(-1);
 		}
-		return response.build().toByteArray();
+		return null;
+		// return response.build().toByteArray();
 	}
 
 	// Datanode <-> Namenode interaction methods
@@ -140,35 +156,57 @@ public class NameNode implements INameNode {
 		} catch (Exception e) {
 			System.err.println("Error at blockReport " + e.toString());
 			e.printStackTrace();
-			response.addStatus(-1);
+			// response.addStatus(-1);
 		}
-		return response.build().toByteArray();
+		return null;
+		// return response.build().toByteArray();
 	}
 
-	public byte[] heartBeat(byte[] inp) throws RemoteException {
-		return response.build().toByteArray();
+
+
+	public byte[] heartBeat(byte[] inp) throws RemoteException
+	{
+		try{
+			HeartbeatProto.Heartbeat heartbeat = HeartbeatProto.Heartbeat.parseFrom(inp);
+			System.out.println(heartbeat.getName()+ " heartbeat");
+			if( this.dataNodes[heartbeat.getId()] == null){
+				this.dataNodes[heartbeat.getId()] = new DataNode(heartbeat.getIpAddress(), heartbeat.getPort(), heartbeat.getName());
+			}
+			long currentTimeMillis = System.currentTimeMillis(); 
+			heartbeatTimestamp[heartbeat.getId()] = currentTimeMillis;
+
+			for(int i=0; i<heartbeatTimestamp.length; i++){
+				if(this.dataNodes[i]!=null && TimeUnit.MILLISECONDS.toMinutes(currentTimeMillis-heartbeatTimestamp[i]) > 1){
+					this.dataNodes[i] = null;
+					System.out.println("Looks like DataNode"+(i+1)+" is dead!");
+				}
+			}
+		} catch(InvalidProtocolBufferException e){
+			e.printStackTrace();
+		}
+		return null;
+		// return response.build().toByteArray();
 	}
 
-	public void printMsg(String msg) {
+	public String printMsg(String msg) throws RemoteException
+	{
+
 		System.out.println(msg);
+		return msg;
 	}
 
-	public static void main(String[] args) throws InterruptedException, NumberFormatException, IOException {
-
-		// creates a new reader for the nn_config file to retrieve IP addr and port
-		BufferedReader bf = new BufferedReader(new FileReader("nn_config.txt"));
-
-		// skips the line for the format of the file
-		bf.readLine();
-
-		String[] details = bf.readLine().split(";");
-		String name = details[0];
-		String addr = details[1];
-		int port = Integer.parseInt(details[2]);
-
-		// create a new NameNode object
-		NameNode nn = new NameNode(addr, port, name);
-
+	public static void main(String[] args) throws InterruptedException, NumberFormatException, IOException
+	{
+		try{
+			LocateRegistry.createRegistry(9090);
+			NameNode obj = new NameNode("localhost", 9000,"NN");
+			INameNode stub = (INameNode) UnicastRemoteObject.exportObject(obj, 0);
+			Registry registry = LocateRegistry.getRegistry(9090);
+			registry.bind("NameNode", stub);
+		} catch(Exception e){
+			System.out.println("Server Exception: "+ e.toString());
+			e.printStackTrace();
+		}
 	}
 
 }
