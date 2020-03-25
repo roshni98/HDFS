@@ -9,7 +9,7 @@ import java.rmi.RemoteException;
 import java.util.*;
 import java.io.*;
 import ds.hdfs.hdfsformat.*;
-import com.google.protobuf.ByteString; 
+import com.google.protobuf.ByteString;
 //import ds.hdfs.INameNode;
 
 public class Client
@@ -19,6 +19,8 @@ public class Client
     public IDataNode DNStub; //Data Node stub
     public Client()
     {
+      // this.DNStub = GetDNStub("")
+      // this.NNStub = GetNNStub("")
         //Get the Name Node Stub
         //nn_details contain NN details in the format Server;IP;Port
     }

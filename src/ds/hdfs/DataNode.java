@@ -41,12 +41,12 @@ public class DataNode implements IDataNode
 
         try {
             //append
-        } 
-        catch (IOException ioe) 
+        }
+        catch (IOException ioe)
         {
             ioe.printStackTrace();
-        } 
-        finally 
+        }
+        finally
         {                       // always close the file
             if (bw != null) try {
                 bw.close();
@@ -58,8 +58,10 @@ public class DataNode implements IDataNode
 
     public byte[] readBlock(byte[] Inp)
     {
+      // unserialize the byte array to proto object
         try
         {
+          //
         }
         catch(Exception e)
         {
@@ -72,8 +74,10 @@ public class DataNode implements IDataNode
 
     public byte[] writeBlock(byte[] Inp)
     {
+      // unserialize the byte array to proto object
         try
         {
+          //
         }
         catch(Exception e)
         {
@@ -123,7 +127,7 @@ public class DataNode implements IDataNode
     public static void main(String args[]) throws InvalidProtocolBufferException, IOException
     {
         //Define a Datanode Me
-        DataNode Me = new DataNode();        
+        DataNode Me = new DataNode();
 
     }
 }

@@ -1,0 +1,13 @@
+
+syntax = "proto2";
+
+package hdfs;
+
+option java_package = "ds.hdfs";
+option java_outer_classname = "HeartbeatProto";
+
+message Heartbeat{
+ required string name = 1;
+ required string ip_address = 2;
+ required int32 port = 3;
+}
