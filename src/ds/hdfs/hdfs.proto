@@ -1,5 +1,13 @@
 package hdfs;
 
 option java_package = "ds.hdfs";
-option java_outer_classname = "SOMETHING";
+option java_outer_classname = "HDFS";
+
+message HeartBeat {
+    required string id = 1;
+    message Files {
+        required string fileName = 1;
+    }
+    repeated Files files = 2;
+}
 

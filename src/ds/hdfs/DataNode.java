@@ -1,5 +1,6 @@
 //Written By Shaleen Garg
 package ds.hdfs;
+
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.RemoteException;
@@ -21,8 +22,7 @@ import java.nio.charset.Charset;
 // import ds.hdfs.hdfsformat.*;
 // import ds.hdfs.IDataNode.*;
 
-public class DataNode implements IDataNode
-{
+public class DataNode implements IDataNode {
     protected String MyChunksFile;
     protected INameNode NNStub;
     protected String MyIP;
@@ -30,13 +30,13 @@ public class DataNode implements IDataNode
     protected String MyName;
     protected int MyID;
 
-    public DataNode()
-    {
-        //Constructor
+    /* Creates a DataNode Object of the fields listed above */
+    public DataNode() {
+        // Constructor
     }
 
-    public static void appendtoFile(String Filename, String Line)
-    {
+    /* IGNORE THIS METHOD */
+    public static void appendtoFile(String Filename, String Line) {
         BufferedWriter bw = null;
 
         // try {
@@ -65,6 +65,7 @@ public class DataNode implements IDataNode
         }
         catch(Exception e)
         {
+
             System.out.println("Error at readBlock");
             // response.setStatus(-1);
         }
@@ -81,6 +82,7 @@ public class DataNode implements IDataNode
         }
         catch(Exception e)
         {
+
             System.out.println("Error at writeBlock ");
             // response.setStatus(-1);
         }
@@ -88,36 +90,30 @@ public class DataNode implements IDataNode
         // return response.build().toByteArray();
     }
 
-    public void BlockReport() throws IOException
-    {
+    public void BlockReport() throws IOException {
     }
 
-    public void BindServer(String Name, String IP, int Port)
-    {
-        try
-        {
+    public void BindServer(String Name, String IP, int Port) {
+        try {
             IDataNode stub = (IDataNode) UnicastRemoteObject.exportObject(this, 0);
             System.setProperty("java.rmi.server.hostname", IP);
             Registry registry = LocateRegistry.getRegistry(Port);
             registry.rebind(Name, stub);
             System.out.println("\nDataNode connected to RMIregistry\n");
-        }catch(Exception e){
+        } catch (Exception e) {
             System.err.println("Server Exception: " + e.toString());
             e.printStackTrace();
         }
     }
 
-    public INameNode GetNNStub(String Name, String IP, int Port)
-    {
-        while(true)
-        {
-            try
-            {
+    public INameNode GetNNStub(String Name, String IP, int Port) {
+        while (true) {
+            try {
                 Registry registry = LocateRegistry.getRegistry(IP, Port);
                 INameNode stub = (INameNode) registry.lookup(Name);
                 System.out.println("NameNode Found!");
                 return stub;
-            }catch(Exception e){
+            } catch (Exception e) {
                 System.out.println("NameNode still not Found");
                 continue;
             }
@@ -154,6 +150,7 @@ public class DataNode implements IDataNode
                 e.printStackTrace();
             }
         }
+
 
     }
 }
