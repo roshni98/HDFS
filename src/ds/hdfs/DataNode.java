@@ -12,14 +12,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
+// import com.google.protobuf.ByteString;
+// import com.google.protobuf.InvalidProtocolBufferException;
 
 import java.io.*;
 import java.nio.charset.Charset;
 
-import ds.hdfs.hdfsformat.*;
-import ds.hdfs.IDataNode.*;
+// import ds.hdfs.hdfsformat.*;
+// import ds.hdfs.IDataNode.*;
 
 public class DataNode implements IDataNode
 {
@@ -39,20 +39,20 @@ public class DataNode implements IDataNode
     {
         BufferedWriter bw = null;
 
-        try {
-            //append
-        }
-        catch (IOException ioe)
-        {
-            ioe.printStackTrace();
-        }
-        finally
-        {                       // always close the file
-            if (bw != null) try {
-                bw.close();
-            } catch (IOException ioe2) {
-            }
-        }
+        // try {
+        //     //append
+        // }
+        // catch (IOException ioe)
+        // {
+        //     ioe.printStackTrace();
+        // }
+        // finally
+        // {                       // always close the file
+        //     if (bw != null) try {
+        //         bw.close();
+        //     } catch (IOException ioe2) {
+        //     }
+        // }
 
     }
 
@@ -66,10 +66,10 @@ public class DataNode implements IDataNode
         catch(Exception e)
         {
             System.out.println("Error at readBlock");
-            response.setStatus(-1);
+            // response.setStatus(-1);
         }
-
-        return response.build().toByteArray();
+        return null;
+        // return response.build().toByteArray();
     }
 
     public byte[] writeBlock(byte[] Inp)
@@ -82,10 +82,10 @@ public class DataNode implements IDataNode
         catch(Exception e)
         {
             System.out.println("Error at writeBlock ");
-            response.setStatus(-1);
+            // response.setStatus(-1);
         }
-
-        return response.build().toByteArray();
+        return null;
+        // return response.build().toByteArray();
     }
 
     public void BlockReport() throws IOException
@@ -124,10 +124,36 @@ public class DataNode implements IDataNode
         }
     }
 
-    public static void main(String args[]) throws InvalidProtocolBufferException, IOException
-    {
+    // InvalidProtocolBufferException, 
+    public static void main(String args[]) throws IOException
+    {   
+
+        String dataNodeName = "DataNode2";
+        String dataNodeIp = "localhost";
+        int portNum = 9092; 
+        int id = 1;
+
         //Define a Datanode Me
         DataNode Me = new DataNode();
+        LocateRegistry.createRegistry(portNum);
+        Me.BindServer(dataNodeName, dataNodeIp, portNum);
+       
+        INameNode nameNode = Me.GetNNStub("NameNode", null, 9090);
+        HeartbeatProto.Heartbeat.Builder protoMsg = HeartbeatProto.Heartbeat.newBuilder();
+        protoMsg.setIpAddress(dataNodeIp);
+        protoMsg.setPort(portNum);
+        protoMsg.setName(dataNodeName);
+        protoMsg.setId(id);
+
+        while(true){
+            try{
+                // nameNode.printMsg(dataNodeName+" heartbeat");
+                nameNode.heartBeat(protoMsg.build().toByteArray());
+                Thread.sleep(10*1000); // sleeps for every 10 seconds
+            } catch(InterruptedException e){
+                e.printStackTrace();
+            }
+        }
 
     }
 }

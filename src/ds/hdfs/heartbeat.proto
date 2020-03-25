@@ -10,4 +10,5 @@ message Heartbeat{
  required string name = 1;
  required string ip_address = 2;
  required int32 port = 3;
+ required int32 id = 4;
 }

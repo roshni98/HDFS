@@ -62,6 +62,17 @@ public final class HeartbeatProto {
      * @return The port.
      */
     int getPort();
+
+    /**
+     * <code>required int32 id = 4;</code>
+     * @return Whether the id field is set.
+     */
+    boolean hasId();
+    /**
+     * <code>required int32 id = 4;</code>
+     * @return The id.
+     */
+    int getId();
   }
   /**
    * Protobuf type {@code hdfs.Heartbeat}
@@ -128,6 +139,11 @@ public final class HeartbeatProto {
               port_ = input.readInt32();
               break;
             }
+            case 32: {
+              bitField0_ |= 0x00000008;
+              id_ = input.readInt32();
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -179,7 +195,7 @@ public final class HeartbeatProto {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -196,7 +212,7 @@ public final class HeartbeatProto {
         getNameBytes() {
       java.lang.Object ref = name_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         name_ = b;
@@ -224,7 +240,7 @@ public final class HeartbeatProto {
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
-        com.google.protobuf.ByteString bs =
+        com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
         if (bs.isValidUtf8()) {
@@ -241,7 +257,7 @@ public final class HeartbeatProto {
         getIpAddressBytes() {
       java.lang.Object ref = ipAddress_;
       if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b =
+        com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         ipAddress_ = b;
@@ -268,6 +284,23 @@ public final class HeartbeatProto {
       return port_;
     }
 
+    public static final int ID_FIELD_NUMBER = 4;
+    private int id_;
+    /**
+     * <code>required int32 id = 4;</code>
+     * @return Whether the id field is set.
+     */
+    public boolean hasId() {
+      return ((bitField0_ & 0x00000008) != 0);
+    }
+    /**
+     * <code>required int32 id = 4;</code>
+     * @return The id.
+     */
+    public int getId() {
+      return id_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -287,6 +320,10 @@ public final class HeartbeatProto {
         memoizedIsInitialized = 0;
         return false;
       }
+      if (!hasId()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
       memoizedIsInitialized = 1;
       return true;
     }
@@ -302,6 +339,9 @@ public final class HeartbeatProto {
       }
       if (((bitField0_ & 0x00000004) != 0)) {
         output.writeInt32(3, port_);
+      }
+      if (((bitField0_ & 0x00000008) != 0)) {
+        output.writeInt32(4, id_);
       }
       unknownFields.writeTo(output);
     }
@@ -321,6 +361,10 @@ public final class HeartbeatProto {
       if (((bitField0_ & 0x00000004) != 0)) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(3, port_);
+      }
+      if (((bitField0_ & 0x00000008) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(4, id_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -352,6 +396,11 @@ public final class HeartbeatProto {
         if (getPort()
             != other.getPort()) return false;
       }
+      if (hasId() != other.hasId()) return false;
+      if (hasId()) {
+        if (getId()
+            != other.getId()) return false;
+      }
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -374,6 +423,10 @@ public final class HeartbeatProto {
       if (hasPort()) {
         hash = (37 * hash) + PORT_FIELD_NUMBER;
         hash = (53 * hash) + getPort();
+      }
+      if (hasId()) {
+        hash = (37 * hash) + ID_FIELD_NUMBER;
+        hash = (53 * hash) + getId();
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -514,6 +567,8 @@ public final class HeartbeatProto {
         bitField0_ = (bitField0_ & ~0x00000002);
         port_ = 0;
         bitField0_ = (bitField0_ & ~0x00000004);
+        id_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000008);
         return this;
       }
 
@@ -553,6 +608,10 @@ public final class HeartbeatProto {
         if (((from_bitField0_ & 0x00000004) != 0)) {
           result.port_ = port_;
           to_bitField0_ |= 0x00000004;
+        }
+        if (((from_bitField0_ & 0x00000008) != 0)) {
+          result.id_ = id_;
+          to_bitField0_ |= 0x00000008;
         }
         result.bitField0_ = to_bitField0_;
         onBuilt();
@@ -616,6 +675,9 @@ public final class HeartbeatProto {
         if (other.hasPort()) {
           setPort(other.getPort());
         }
+        if (other.hasId()) {
+          setId(other.getId());
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -630,6 +692,9 @@ public final class HeartbeatProto {
           return false;
         }
         if (!hasPort()) {
+          return false;
+        }
+        if (!hasId()) {
           return false;
         }
         return true;
@@ -689,7 +754,7 @@ public final class HeartbeatProto {
           getNameBytes() {
         java.lang.Object ref = name_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           name_ = b;
@@ -773,7 +838,7 @@ public final class HeartbeatProto {
           getIpAddressBytes() {
         java.lang.Object ref = ipAddress_;
         if (ref instanceof String) {
-          com.google.protobuf.ByteString b =
+          com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
           ipAddress_ = b;
@@ -859,6 +924,43 @@ public final class HeartbeatProto {
         onChanged();
         return this;
       }
+
+      private int id_ ;
+      /**
+       * <code>required int32 id = 4;</code>
+       * @return Whether the id field is set.
+       */
+      public boolean hasId() {
+        return ((bitField0_ & 0x00000008) != 0);
+      }
+      /**
+       * <code>required int32 id = 4;</code>
+       * @return The id.
+       */
+      public int getId() {
+        return id_;
+      }
+      /**
+       * <code>required int32 id = 4;</code>
+       * @param value The id to set.
+       * @return This builder for chaining.
+       */
+      public Builder setId(int value) {
+        bitField0_ |= 0x00000008;
+        id_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 id = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearId() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        id_ = 0;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -914,7 +1016,7 @@ public final class HeartbeatProto {
 
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_hdfs_Heartbeat_descriptor;
-  private static final
+  private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_hdfs_Heartbeat_fieldAccessorTable;
 
@@ -926,9 +1028,10 @@ public final class HeartbeatProto {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\017heartbeat.proto\022\004hdfs\";\n\tHeartbeat\022\014\n\004" +
+      "\n\017heartbeat.proto\022\004hdfs\"G\n\tHeartbeat\022\014\n\004" +
       "name\030\001 \002(\t\022\022\n\nip_address\030\002 \002(\t\022\014\n\004port\030\003" +
-      " \002(\005B\031\n\007ds.hdfsB\016HeartbeatProto"
+      " \002(\005\022\n\n\002id\030\004 \002(\005B\031\n\007ds.hdfsB\016HeartbeatPr" +
+      "oto"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -939,7 +1042,7 @@ public final class HeartbeatProto {
     internal_static_hdfs_Heartbeat_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_hdfs_Heartbeat_descriptor,
-        new java.lang.String[] { "Name", "IpAddress", "Port", });
+        new java.lang.String[] { "Name", "IpAddress", "Port", "Id", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

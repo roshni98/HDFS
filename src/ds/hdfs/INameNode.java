@@ -27,4 +27,6 @@ public interface INameNode extends Remote{
 	
 	/* Heartbeat messages between NameNode and DataNode */
 	byte[] heartBeat(byte[] inp ) throws RemoteException;
+
+	String printMsg(String msg) throws RemoteException;
 }
