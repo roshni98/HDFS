@@ -10,21 +10,19 @@ import java.rmi.RemoteException;
 import java.util.*;
 import java.io.*;
 
-import ds.hdfs.hdfsformat.*;
+// import ds.hdfs.hdfsformat.*;
 import com.google.protobuf.ByteString;
+
 //import ds.hdfs.INameNode;
 
-public class Client
-{
-    //Variables Required
-    public INameNode NNStub; //Name Node stub
-    public IDataNode DNStub; //Data Node stub
-    public Client()
-    {
-      // this.DNStub = GetDNStub("")
-      // this.NNStub = GetNNStub("")
-        //Get the Name Node Stub
-        //nn_details contain NN details in the format Server;IP;Port
+public class Client {
+    // Variables Required
+    public INameNode NNStub; // Name Node stub
+    public IDataNode DNStub; // Data Node stub
+
+    public Client() {
+        // this.DNStub = GetDNStub("")
+        this.NNStub = GetNNStub("NameNode", null, 9090);
 
     }
 
@@ -45,8 +43,11 @@ public class Client
             try {
                 Registry registry = LocateRegistry.getRegistry(IP, Port);
                 INameNode stub = (INameNode) registry.lookup(Name);
+                System.out.println("NameNode Found");
+                System.out.println(stub);
                 return stub;
             } catch (Exception e) {
+                e.printStackTrace();
                 continue;
             }
         }
@@ -54,10 +55,40 @@ public class Client
 
     public void PutFile(String Filename) // Put File
     {
-        System.out.println("Going to put file" + Filename);
+
+        System.out.println("Going to put file " + Filename);
         BufferedInputStream bis;
         try {
-            bis = new BufferedInputStream(new FileInputStream(File));
+
+            // make a request to the NameNode to open a new File with write permissions
+            PutProto.OpenFileClientRequest.Builder openFileRequest = PutProto.OpenFileClientRequest.newBuilder();
+            openFileRequest.setFileName(Filename);
+            openFileRequest.setWritemode(true);
+            byte[] openFileAckBytes = NNStub.openFile(openFileRequest.build().toByteArray());
+
+            // receive a fileHandle response from the NameNode
+            PutProto.OpenFileNameNodeAck openFileAck = PutProto.OpenFileNameNodeAck.parseFrom(openFileAckBytes);
+
+            int fileHandle = openFileAck.getFileHandle();
+            // if -1, then failure
+            if (fileHandle == -1) {
+                System.out.println("NameNode: openFile - failure");
+                return;
+            }
+            System.out.println("NameNode: openFile - success");
+
+            // make a call to assignBlock to retrieve the DataNodes to write the file to
+            PutProto.AssignBlockClientRequest.Builder assignBlockRequest = PutProto.AssignBlockClientRequest
+                    .newBuilder();
+            assignBlockRequest.setFileHandle(fileHandle);
+            byte[] assignBlockResponseBytes = NNStub.assignBlock(assignBlockRequest.build().toByteArray());
+
+            // receive DataNodes to write to from the NameNode
+            PutProto.AssignBlockNameNodeResponse assignBlockResponse = PutProto.AssignBlockNameNodeResponse
+                    .parseFrom(assignBlockResponseBytes);
+            System.out.println(assignBlockResponse);
+
+            // bis = new BufferedInputStream(new FileInputStream(File));
         } catch (Exception e) {
             System.out.println("File not found !!!");
             return;
@@ -73,17 +104,7 @@ public class Client
     public static void main(String[] args) throws RemoteException, UnknownHostException {
         // To read config file and Connect to NameNode
         // Intitalize the Client
-
-        // Configuration conf = new Configuration();
-        // conf.addResource(new Path("file:///etc/hadoop/conf/core-site.xml")); //
-        // Replace with actual path
-        // conf.addResource(new Path("file:///etc/hadoop/conf/hdfs-site.xml")); //
-        // Replace with actual path
-
-        // Path pt = new Path("."); // HDFS Path
-        // FileSystem fs = pt.getFileSystem(conf);
-
-        // System.out.println("Home directory :" + fs.getHomeDirectory());
+        System.out.println("Started a Client");
         Client Me = new Client();
         System.out.println("Welcome to HDFS!!");
         Scanner Scan = new Scanner(System.in);
@@ -97,7 +118,7 @@ public class Client
                 System.out.println("The following are the Supported Commands");
                 System.out.println("1. put filename ## To put a file in HDFS");
                 System.out.println("2. get filename ## To get a file in HDFS");
-                System.out.println("2. list ## To get the list of files in HDFS");
+                System.out.println("3. list ## To get the list of files in HDFS");
             } else if (Split_Commands[0].equals("put")) // put Filename
             {
                 // Put file into HDFS

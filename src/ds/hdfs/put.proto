@@ -1,0 +1,38 @@
+syntax = "proto2";
+
+package hdfs;
+
+option java_package = "ds.hdfs";
+option java_outer_classname = "PutProto";
+
+message OpenFileClientRequest {
+    required string fileName = 1;
+    required bool writemode = 2;
+}
+
+message OpenFileNameNodeAck {
+    required int32 fileHandle = 1;
+}
+
+message AssignBlockClientRequest {
+    required int32 fileHandle = 1;
+}
+
+message AssignBlockNameNodeResponse {
+    message DataNode {
+        required string name = 1;
+        required string ip = 2;
+        required int32 port = 3;
+    }
+    repeated DataNode dataNodes = 1;
+}
+
+message WriteBlockClientRequest {
+    required int32 blockNumber = 1;
+    required string fileName = 2;
+    required bytes data = 3;
+}
+
+message WriteBlockDataNodeResponse {
+    required bool isSuccessful = 1;
+}
