@@ -19,9 +19,9 @@ public class Client {
     // Variables Required
     public INameNode NNStub; // Name Node stub
     public IDataNode DNStub; // Data Node stub
+    public int BUFFERSIZE = 64000;
 
     public Client() {
-        // this.DNStub = GetDNStub("")
         this.NNStub = GetNNStub("NameNode", null, 9090);
 
     }
@@ -29,10 +29,14 @@ public class Client {
     public IDataNode GetDNStub(String Name, String IP, int Port) {
         while (true) {
             try {
+                System.out.println(Name);
+                System.out.println(Port);
                 Registry registry = LocateRegistry.getRegistry(IP, Port);
+                System.out.println(registry);
                 IDataNode stub = (IDataNode) registry.lookup(Name);
                 return stub;
             } catch (Exception e) {
+                e.printStackTrace();
                 continue;
             }
         }
@@ -57,7 +61,6 @@ public class Client {
     {
 
         System.out.println("Going to put file " + Filename);
-        BufferedInputStream bis;
         try {
 
             // make a request to the NameNode to open a new File with write permissions
@@ -88,8 +91,61 @@ public class Client {
                     .parseFrom(assignBlockResponseBytes);
             System.out.println(assignBlockResponse);
 
-            // bis = new BufferedInputStream(new FileInputStream(File));
+            // create DataNode stubs for the DataNodes to write to
+            PutProto.AssignBlockNameNodeResponse.DataNode dataNode1Response = assignBlockResponse.getDataNodes(0);
+            System.out.println("Response: " + dataNode1Response);
+            PutProto.AssignBlockNameNodeResponse.DataNode dataNode2Response = assignBlockResponse.getDataNodes(1);
+            System.out.println("Response: " + dataNode2Response);
+            IDataNode dataNode1 = GetDNStub(dataNode1Response.getName(), dataNode1Response.getIp(),
+                    dataNode1Response.getPort());
+            System.out.println(dataNode1);
+            IDataNode dataNode2 = GetDNStub(dataNode2Response.getName(), dataNode2Response.getIp(),
+                    dataNode2Response.getPort());
+            System.out.println(dataNode2);
+
+            // setup input stream to read from the file you want to write to
+
+            File file = new File(Filename);
+            BufferedInputStream bis = new BufferedInputStream(new FileInputStream(file));
+            byte[] buffer = new byte[BUFFERSIZE];
+            int bytesRead = 0;
+            int blockNumber = 1;
+
+            // read bufferSize (default = 64000 bytes) from the file each time until no
+            // bytes are read
+            while ((bytesRead = bis.read(buffer)) >= 0) {
+                // make a request to write a block to DataNode1
+                PutProto.WriteBlockClientRequest.Builder writeBlockRequest = PutProto.WriteBlockClientRequest
+                        .newBuilder();
+                writeBlockRequest.setBlockNumber(blockNumber);
+                writeBlockRequest.setData(ByteString.copyFrom(buffer));
+                writeBlockRequest.setFileName(Filename);
+                PutProto.WriteBlockDataNodeResponse writeBlockResponse = PutProto.WriteBlockDataNodeResponse
+                        .parseFrom(dataNode1.writeBlock(writeBlockRequest.build().toByteArray()));
+                blockNumber++;
+
+                // receive response from DataNode if write was successful or not
+                PutProto.WriteBlockDataNodeResponse.Builder writeBlockData = PutProto.WriteBlockDataNodeResponse
+                        .newBuilder();
+                boolean success = writeBlockData.getIsSuccessful();
+                if (success) {
+                    System.out.println("File successfully written to DataNode");
+                }
+                // make a request to write a block to DataNode2
+                // PutProto.WriteBlockClientRequest.Builder writeBlockRequest =
+                // PutProto.WriteBlockClientRequest
+                // .newBuilder();
+                // writeBlockRequest.setBlockNumber(blockNumber);
+                // writeBlockRequest.setData(ByteString.copyFrom(buffer));
+                // writeBlockRequest.setFileName(Filename);
+                // dataNode2.writeBlock(writeBlockRequest.build().toByteArray());
+
+            }
+
+            // // dataNode1.writeBlock(inp);
+            // }
         } catch (Exception e) {
+            e.printStackTrace();
             System.out.println("File not found !!!");
             return;
         }

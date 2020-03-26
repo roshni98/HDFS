@@ -166,6 +166,10 @@ public class NameNode implements INameNode {
 			while (dataNode1Index == dataNode2Index) {
 				dataNode2Index = random.nextInt(dataNodes.length);
 			}
+			System.out.println(dataNodes[0]);
+			System.out.println(dataNodes[1]);
+			System.out.println(dataNodes[2]);
+
 			DataNode dataNode1 = dataNodes[dataNode1Index];
 			DataNode dataNode2 = dataNodes[dataNode2Index];
 			// package data for each DataNode and send it back to the client

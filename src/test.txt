@@ -1,0 +1,5 @@
+Started a Client
+NameNode Found
+Proxy[INameNode,RemoteObjectInvocationHandler[UnicastRef [liveRef: [endpoint:[192.168.1.4:52941](remote),objID:[-1c85dc9:17117a202f3:-7fff, -8746901942804297026]]]]]
+Welcome to HDFS!!
+$> 

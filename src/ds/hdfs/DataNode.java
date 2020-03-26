@@ -13,7 +13,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-// import com.google.protobuf.ByteString;
+import javax.sound.sampled.Port;
+
+import com.google.protobuf.ByteString;
 // import com.google.protobuf.InvalidProtocolBufferException;
 
 import java.io.*;
@@ -72,14 +74,43 @@ public class DataNode implements IDataNode {
     public byte[] writeBlock(byte[] Inp) {
         // unserialize the byte array to proto object
         try {
-            //
-        } catch (Exception e) {
+            System.out.println("Client called writeBlock");
 
+            // receive block number, filename, and data to write in this block from the
+            // client
+            PutProto.WriteBlockClientRequest writeBlockRequest = PutProto.WriteBlockClientRequest.parseFrom(Inp);
+            String data = writeBlockRequest.getData().toStringUtf8();
+            int blockNumber = writeBlockRequest.getBlockNumber();
+            String fileName = writeBlockRequest.getFileName();
+
+            // create a new file in the DataNode to represent the block
+            String path = "DataNode1/" + blockNumber + " - " + fileName;
+            File file = new File(path);
+            file.getParentFile().mkdirs();
+            file.createNewFile();
+
+            // setup a filewriter and bufferedwriter to write block to DataNode
+            FileWriter fw = new FileWriter(file);
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.write(data);
+            bw.close();
+            fw.close();
+
+            // respond to client that write was successful
+            PutProto.WriteBlockDataNodeResponse.Builder writeBlockResponse = PutProto.WriteBlockDataNodeResponse
+                    .newBuilder();
+            writeBlockResponse.setIsSuccessful(true);
+            return writeBlockResponse.build().toByteArray();
+
+        } catch (Exception e) {
             System.out.println("Error at writeBlock ");
-            // response.setStatus(-1);
+            e.printStackTrace();
+            // respond to client that write was unsucessful
+            PutProto.WriteBlockDataNodeResponse.Builder writeBlockResponse = PutProto.WriteBlockDataNodeResponse
+                    .newBuilder();
+            writeBlockResponse.setIsSuccessful(false);
+            return writeBlockResponse.build().toByteArray();
         }
-        return null;
-        // return response.build().toByteArray();
     }
 
     public void BlockReport() throws IOException {
@@ -87,8 +118,8 @@ public class DataNode implements IDataNode {
 
     public void BindServer(String Name, String IP, int Port) {
         try {
-            IDataNode stub = (IDataNode) UnicastRemoteObject.exportObject(this, 0);
-            System.setProperty("java.rmi.server.hostname", IP);
+            IDataNode stub = (IDataNode) UnicastRemoteObject.exportObject(this, Port);
+            System.setProperty("java.rmi.server.hostname", "localhost");
             Registry registry = LocateRegistry.getRegistry(Port);
             registry.rebind(Name, stub);
             System.out.println("\nDataNode connected to RMIregistry\n");
@@ -117,9 +148,9 @@ public class DataNode implements IDataNode {
     // InvalidProtocolBufferException,
     public static void main(String args[]) throws IOException {
 
-        String dataNodeName = "DataNode2";
+        String dataNodeName = "DataNode3";
         String dataNodeIp = "localhost";
-        int portNum = 9092;
+        int portNum = 9094;
         int id = 2;
 
         // Define a Datanode Me
