@@ -1,0 +1,15 @@
+
+syntax = "proto2";
+
+package hdfs;
+
+option java_package = "ds.hdfs";
+option java_outer_classname = "BlockReportProto";
+
+message BlockReport{
+ message ListBlocks {
+    repeated int32 blockNumber = 1;
+  }
+  map<string, ListBlocks> files = 1; 
+  required string dataNodename = 2;
+}
