@@ -18,6 +18,8 @@ import javax.sound.sampled.Port;
 import com.google.protobuf.ByteString;
 // import com.google.protobuf.InvalidProtocolBufferException;
 
+import jdk.vm.ci.aarch64.AArch64;
+
 import java.io.*;
 import java.nio.charset.Charset;
 
@@ -32,9 +34,11 @@ public class DataNode implements IDataNode {
     protected String MyName;
     protected int MyID;
 
+    HashMap<String,ArrayList<Integer>> allFiles;
     /* Creates a DataNode Object of the fields listed above */
     public DataNode() {
         // Constructor
+      allFiles=new HashMap<>();
     }
 
     /* IGNORE THIS METHOD */
@@ -71,6 +75,7 @@ public class DataNode implements IDataNode {
         // return response.build().toByteArray();
     }
 
+
     public byte[] writeBlock(byte[] Inp) {
         // unserialize the byte array to proto object
         try {
@@ -84,6 +89,12 @@ public class DataNode implements IDataNode {
             String fileName = writeBlockRequest.getFileName();
 
             // create a new file in the DataNode to represent the block
+            //Use hashmap to keep track
+            if(!this.allFiles.containsKey(fileName)){
+                this.allFiles.put(fileName, new ArrayList<Integer>());
+            }
+            this.allFiles.get(fileName).add(Integer.valueOf(blockNumber));
+
             String path = "DataNode1/" + blockNumber + " - " + fileName;
             File file = new File(path);
             file.getParentFile().mkdirs();
@@ -113,7 +124,18 @@ public class DataNode implements IDataNode {
         }
     }
 
-    public void BlockReport() throws IOException {
+  public BlockReportProto.BlockReport BlockReport() throws IOException {
+     BlockReportProto.BlockReport.Builder blockReport = BlockReportProto.BlockReport.newBuilder();
+     Iterator<String> it = this.allFiles.keySet().iterator();
+     while (it.hasNext()) {
+       String key = it.next();
+       System.out.println(key);
+        BlockReportProto.BlockReport.ListBlocks.Builder listBlocks = BlockReportProto.BlockReport.ListBlocks.newBuilder();
+        listBlocks.addAllBlockNumber(this.allFiles.get(key));
+        blockReport.putFiles(key,listBlocks.build());
+     }
+     blockReport.setDataNodename(this.MyName);
+     return blockReport.build();
     }
 
     public void BindServer(String Name, String IP, int Port) {
@@ -148,15 +170,19 @@ public class DataNode implements IDataNode {
     // InvalidProtocolBufferException,
     public static void main(String args[]) throws IOException {
 
-        String dataNodeName = "DataNode3";
+        String dataNodeName = "DataNode1";
         String dataNodeIp = "localhost";
-        int portNum = 9094;
-        int id = 2;
+        int portNum = 9092;
+        int id = 0;
 
         // Define a Datanode Me
         DataNode Me = new DataNode();
         LocateRegistry.createRegistry(portNum);
         Me.BindServer(dataNodeName, dataNodeIp, portNum);
+        Me.MyName = dataNodeName;
+        Me.MyID = id;
+        Me.MyPort = portNum;
+        Me.MyIP = dataNodeIp;
 
         INameNode nameNode = Me.GetNNStub("NameNode", null, 9090);
         HeartbeatProto.Heartbeat.Builder protoMsg = HeartbeatProto.Heartbeat.newBuilder();
@@ -169,6 +195,7 @@ public class DataNode implements IDataNode {
             try {
                 // nameNode.printMsg(dataNodeName+" heartbeat");
                 nameNode.heartBeat(protoMsg.build().toByteArray());
+                nameNode.blockReport(Me.BlockReport().toByteArray());
                 Thread.sleep(10 * 1000); // sleeps for every 10 seconds
             } catch (InterruptedException e) {
                 e.printStackTrace();

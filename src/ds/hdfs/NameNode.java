@@ -42,6 +42,7 @@ public class NameNode implements INameNode {
 	DataNode[] dataNodes;
 	long[] heartbeatTimestamp;
 	HashMap<Integer, FileInfo> files;
+	HashMap<String, BlockReportProto.BlockReport> blockMaps;
 
 	public NameNode(String addr, int p, String nn) throws RemoteException {
 		this.ip = addr;
@@ -51,6 +52,8 @@ public class NameNode implements INameNode {
 		dataNodes = new DataNode[3];
 		heartbeatTimestamp = new long[3];
 		files = new HashMap<Integer, FileInfo>();
+		blockMaps = new HashMap<>();
+
 	}
 
 	/* Class that represents information about DataNode object for Hearbeat */
@@ -203,6 +206,11 @@ public class NameNode implements INameNode {
 
 	public byte[] blockReport(byte[] inp) throws RemoteException {
 		try {
+			BlockReportProto.BlockReport blockRep = BlockReportProto.BlockReport.parseFrom(inp);
+			if(blockRep != null && blockRep.getDataNodename() != null){
+				blockMaps.put(blockRep.getDataNodename(), blockRep);
+				System.out.println("BlockReport received from :"+blockRep.getDataNodename());
+			}
 		} catch (Exception e) {
 			System.err.println("Error at blockReport " + e.toString());
 			e.printStackTrace();
