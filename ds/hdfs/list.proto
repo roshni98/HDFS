@@ -1,0 +1,13 @@
+syntax = "proto2";
+
+package ds.hdfs;
+
+option java_package = "com.google.protobuf";
+option java_outer_classname = "ListProto";
+
+message ListFilesResponse {
+    message File {
+        required string fileName = 1;
+    }
+    repeated File files = 1;
+}
