@@ -18,8 +18,6 @@ import javax.sound.sampled.Port;
 import com.google.protobuf.ByteString;
 // import com.google.protobuf.InvalidProtocolBufferException;
 
-import jdk.vm.ci.aarch64.AArch64;
-
 import java.io.*;
 import java.nio.charset.Charset;
 
@@ -63,16 +61,24 @@ public class DataNode implements IDataNode {
     }
 
     public byte[] readBlock(byte[] Inp) {
-        // unserialize the byte array to proto object
-        try {
-            //
-        } catch (Exception e) {
+        //  unserialize the byte array to proto object
+        ReadResponseProto.ReadResponse.Builder readResponse = ReadResponseProto.ReadResponse.newBuilder();
 
+         try {
+            ReadRequestProto.ReadRequest readRequest = ReadRequestProto.ReadRequest.parseFrom(Inp);
+            String filename = this.MyName+"/"+readRequest.getBlockNumber() + " - "+ readRequest.getFilename();
+            File file = new File(filename);
+            byte fileContent[] = new byte[(int)file.length()];
+            FileInputStream fs = new FileInputStream(file);
+            fs.read(fileContent);
+            readResponse.setData(ByteString.copyFrom(fileContent));
+            readResponse.setFilename(readRequest.getFilename());
+            return readResponse.build().toByteArray();
+        } catch (Exception e) {
             System.out.println("Error at readBlock");
-            // response.setStatus(-1);
-        }
+            e.printStackTrace();
+         }
         return null;
-        // return response.build().toByteArray();
     }
 
 
@@ -95,7 +101,7 @@ public class DataNode implements IDataNode {
             }
             this.allFiles.get(fileName).add(Integer.valueOf(blockNumber));
 
-            String path = "DataNode1/" + blockNumber + " - " + fileName;
+            String path = this.MyName+"/" + blockNumber + " - " + fileName;
             File file = new File(path);
             file.getParentFile().mkdirs();
             file.createNewFile();
@@ -129,7 +135,7 @@ public class DataNode implements IDataNode {
      Iterator<String> it = this.allFiles.keySet().iterator();
      while (it.hasNext()) {
        String key = it.next();
-       System.out.println(key);
+    //    System.out.println(key);
         BlockReportProto.BlockReport.ListBlocks.Builder listBlocks = BlockReportProto.BlockReport.ListBlocks.newBuilder();
         listBlocks.addAllBlockNumber(this.allFiles.get(key));
         blockReport.putFiles(key,listBlocks.build());
@@ -170,10 +176,10 @@ public class DataNode implements IDataNode {
     // InvalidProtocolBufferException,
     public static void main(String args[]) throws IOException {
 
-        String dataNodeName = "DataNode1";
+        String dataNodeName = "DataNode3";
         String dataNodeIp = "localhost";
-        int portNum = 9092;
-        int id = 0;
+        int portNum = 9094;
+        int id = 2;
 
         // Define a Datanode Me
         DataNode Me = new DataNode();

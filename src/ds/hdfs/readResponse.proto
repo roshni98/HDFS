@@ -1,0 +1,11 @@
+syntax = "proto2";
+
+package hdfs;
+
+option java_package = "ds.hdfs";
+option java_outer_classname = "ReadResponseProto";
+
+message ReadResponse{
+ required string filename = 1;
+ required bytes data = 2;
+}

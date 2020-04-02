@@ -152,6 +152,32 @@ public class Client {
     }
 
     public void GetFile(String FileName) {
+        File file = new File(FileName);
+        FileOutputStream fileOutputStream = null;
+        try {
+            fileOutputStream = new FileOutputStream(file); 
+            System.out.println("here1");
+            getRequestProto.getRequest.Builder gRequest = getRequestProto.getRequest.newBuilder();
+            System.out.println("here2");
+            gRequest.setFilename(FileName);
+            System.out.println("here3");
+            getResponseProto.getResponse gResponse = getResponseProto.getResponse.parseFrom(this.NNStub.getBlockLocations(gRequest.build().toByteArray()));
+            System.out.println("here4");
+            fileOutputStream.write(gResponse.getData().toByteArray());
+            System.out.println("here5");
+        }
+        catch (Exception e) {
+            System.out.println("Error getting file:" + e);
+        } finally {
+            try {
+                if (fileOutputStream != null) {
+                    fileOutputStream.close();
+                }
+            }
+            catch (IOException ioe) {
+                System.out.println("Error while closing stream: " + ioe);
+            }
+        }
     }
 
     public void List() {

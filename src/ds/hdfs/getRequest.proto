@@ -1,0 +1,12 @@
+syntax = "proto2";
+
+package hdfs;
+
+option java_package = "ds.hdfs";
+option java_outer_classname = "getRequestProto";
+
+message getRequest{
+ required string filename = 1;
+
+
+}

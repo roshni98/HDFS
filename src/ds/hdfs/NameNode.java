@@ -2,6 +2,7 @@ package ds.hdfs;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -26,6 +27,7 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.sql.Timestamp;
 
+import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 
 // import com.google.protobuf.InvalidProtocolBufferException;
@@ -147,13 +149,52 @@ public class NameNode implements INameNode {
 
 	public byte[] getBlockLocations(byte[] inp) throws RemoteException {
 		try {
+			//read
+			getRequestProto.getRequest gRequest = getRequestProto.getRequest.parseFrom(inp);
+			String filename = gRequest.getFilename(); // hp.txt 
+			int dataNodeIndex = 0; 
+			List<Integer> blocks = null;
+			// find which dataNode has the file
+			for(String key: blockMaps.keySet()){
+				// map of filename->blocks
+				if(blockMaps.get(key).getFilesMap().containsKey(filename)){
+					blocks = blockMaps.get(key).getFilesMap().get(filename).getBlockNumberList();
+					if(key.equals("DataNode1")){
+						dataNodeIndex = 0;
+					} else if(key.equals("DataNode2")){
+						dataNodeIndex = 1; 
+					} else{ 
+						dataNodeIndex = 3;
+					}
+					break;
+				}
+			}
+			if(blocks != null){
+				DataNode dn = dataNodes[dataNodeIndex];
+				Registry registry = LocateRegistry.getRegistry(dn.ip, dn.port);
+				IDataNode dnStub = (IDataNode) registry.lookup(dn.serverName);
+				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+				for(Integer i : blocks){
+					ReadRequestProto.ReadRequest.Builder readRequest = ReadRequestProto.ReadRequest.newBuilder();
+					readRequest.setFilename(filename);
+					readRequest.setBlockNumber(i);
+					ReadResponseProto.ReadResponse readResponse = ReadResponseProto.ReadResponse.parseFrom(dnStub.readBlock(readRequest.build().toByteArray()));
+					if(readResponse != null){
+						outputStream.write(readResponse.getData().toByteArray());
+					}
+				}
+				getResponseProto.getResponse.Builder gResponse = getResponseProto.getResponse.newBuilder();
+				gResponse.setData(ByteString.copyFrom(outputStream.toByteArray()));
+				gResponse.setFilename(filename);
+				return gResponse.build().toByteArray();
+			}else {
+				throw new Exception("No Blocks found!");
+			}
 		} catch (Exception e) {
 			System.err.println("Error at getBlockLocations " + e.toString());
 			e.printStackTrace();
-			// response.setStatus(-1);
+			return null;
 		}
-		return null;
-		// return response.build().toByteArray();
 	}
 
 	public byte[] assignBlock(byte[] inp) throws RemoteException {
