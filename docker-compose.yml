@@ -1,0 +1,74 @@
+version: '3.7'
+services:
+  namenode:
+    image: roshni/distributed_hdfs
+    ports:
+      - "9090:9090"
+    networks:
+      - hadoopnet
+    environment:
+      - NAMENODE_NAME=NameNode
+      - NAMENODE_PORT=9090
+      - NAMENODE_IP=namenode 
+    entrypoint: /app/run_docker.sh -n
+    tty: true
+
+  dataNode1:
+    image: roshni/distributed_hdfs
+    networks:
+      - hadoopnet
+    tty: true
+    entrypoint: /app/run_docker.sh -d
+    environment:
+      - NODE_NAME=DataNode1
+      - NODE_ID=0
+      - NODE_IP= localhost
+      - NODE_PORT=9095
+      - NAMENODE_IP=namenode
+      - NAMENODE_PORT=9090
+      - NAMENODE_NAME=NameNode
+    ports:
+      - "9095:9095"
+    depends_on:
+      - namenode
+
+  dataNode2:
+    image: roshni/distributed_hdfs
+    networks:
+      - hadoopnet
+    tty: true
+    entrypoint: /app/run_docker.sh -d
+    environment:
+      - NODE_NAME=DataNode2
+      - NODE_ID=1
+      - NODE_IP= localhost
+      - NODE_PORT=9093
+      - NAMENODE_IP=namenode
+      - NAMENODE_PORT=9090
+      - NAMENODE_NAME=NameNode
+    ports:
+      - "9093:9093"
+    depends_on:
+      - namenode
+
+  dataNode3:
+    image: roshni/distributed_hdfs
+    networks:
+      - hadoopnet
+    tty: true
+    entrypoint: /app/run_docker.sh -d
+    environment:
+      - NODE_NAME=DataNode3
+      - NODE_ID=2
+      - NODE_IP= localhost
+      - NODE_PORT=9094
+      - NAMENODE_IP=namenode
+      - NAMENODE_PORT=9090
+      - NAMENODE_NAME=NameNode
+    ports:
+      - "9094:9094"
+    depends_on:
+      - namenode
+networks:
+  hadoopnet:
+    name: hadoopnet
