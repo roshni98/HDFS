@@ -1,29 +1,31 @@
-FROM openjdk:8-jdk-slim
+FROM adoptopenjdk/openjdk13
 
-WORKDIR /usr/app
+USER root
 
-# RUN apt-get update && apt-get install make
+# To solve add-apt-repository : command not found
+RUN apt-get update
+RUN apt-get -y install software-properties-common
 
-RUN ["apt-get", "update"]
-RUN ["apt-get", "install", "make"]
-RUN ["apt-get", "install", "-y", "vim"]
+# # Install Java
+RUN apt-get update && \
+    apt-get install -y openjdk-8-jdk && \
+    apt-get install -y ant && \
+    apt-get clean;
 
-# RUN apt-get update && \
-#     apt-get install -y openjdk-8-jdk && \
-#     apt-get install -y ant && \
-#     apt-get clean;
+# # Fix certificate issues
+RUN apt-get update && \
+    apt-get install ca-certificates-java && \
+    apt-get clean && \
+    update-ca-certificates -f;
 
-# # # Install Java
-# RUN apt-get update && \
-#     apt-get install -y openjdk-8-jdk && \
-#     apt-get install -y ant && \
-#     apt-get clean;
+# # Setup JAVA_HOME -- useful for docker commandline
+ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64/
+RUN export JAVA_HOME
 
-# # # Fix certificate issues
-# RUN apt-get update && \
-#     apt-get install ca-certificates-java && \
-#     apt-get clean && \
-#     update-ca-certificates -f;
-
-COPY . /usr/app/HDFS
-# RUN echo $JAVA_HOME
+# # passwordless ssh
+# RUN ssh-keygen -q -N "" -t dsa -f /etc/ssh/ssh_host_dsa_key
+# RUN ssh-keygen -q -N "" -t rsa -f /etc/ssh/ssh_host_rsa_key
+# RUN ssh-keygen -q -N "" -t rsa -f /root/.ssh/id_rsa
+# RUN cp /root/.ssh/id_rsa.pub /root/.ssh/authorized_keys
+ADD . /app
+RUN echo $JAVA_HOME

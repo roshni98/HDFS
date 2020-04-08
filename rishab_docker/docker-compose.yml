@@ -1,27 +1,22 @@
 version: "3.7"
 services:
   namenode:
-    image: roshni/distributed_hdfs
+    image: rishychawla/hdfs
     volumes:
       - ./src:/src
+    network: host
     ports:
       - "9090:9090"
-    networks:
-      - hadoopnet
     environment:
       - NAMENODE_NAME=NameNode
       - NAMENODE_PORT=9090
       - NAMENODE_IP=namenode
-    entrypoint: run_docker.sh -n
     tty: true
 
   dataNode1:
-    image: roshni/distributed_hdfs
+    image: rishychawla/hdfs
     volumes:
       - ./src:/src
-    networks:
-      - hadoopnet
-    entrypoint: bash -c run_docker.sh -d
     tty: true
     environment:
       - NODE_NAME=DataNode1
@@ -34,11 +29,10 @@ services:
       - "9092:9092"
 
   dataNode2:
-    image: roshni/distributed_hdfs
-    networks:
-      - hadoopnet
+    image: rishychawla/hdfs
+    volumes:
+      - ./src:/src
     tty: true
-    entrypoint: run_docker.sh -d
     environment:
       - NODE_NAME=DataNode2
       - NODE_ID=1
@@ -50,11 +44,10 @@ services:
       - "9093:9093"
 
   dataNode3:
-    image: roshni/distributed_hdfs
-    networks:
-      - hadoopnet
+    image: rishychawla/hdfs
+    volumes:
+      - ./src:/src
     tty: true
-    entrypoint: run_docker.sh -d
     environment:
       - NODE_NAME=DataNode3
       - NODE_ID=2
@@ -64,6 +57,3 @@ services:
       - NAMENODE_NAME=NameNode
     ports:
       - "9094:9094"
-networks:
-  hadoopnet:
-    name: hadoopnet

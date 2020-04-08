@@ -360,9 +360,12 @@ public class NameNode implements INameNode {
 			String currLine = br.readLine();
 			currLine = br.readLine();
 			String[] nameNodeProperties = currLine.split(";");
-			String nameNodeName = nameNodeProperties[0];
-			String nameNodeIP = nameNodeProperties[1];
-			int nameNodePort = Integer.parseInt(nameNodeProperties[2]);
+			String nameNodeName = System.getenv(nameNodeProperties[0]);
+			String nameNodeIP = System.getenv(nameNodeProperties[1]);
+			int nameNodePort = Integer.parseInt(System.getenv(nameNodeProperties[2]));
+			// String nameNodeName = nameNodeProperties[0];
+			// String nameNodeIP = nameNodeProperties[1];
+			// int nameNodePort = Integer.parseInt(nameNodeProperties[2]);
 
 			// read replicationFactor and DataNode timeout time from the config file
 			File config = new File("src/config.txt");
