@@ -1,0 +1,2 @@
+//Each DataNode has this config file: It contains its UniqueIdentifier(Server Name), IP, PORT
+NODE_ID;NODE_IP;NODE_PORT

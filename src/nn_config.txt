@@ -1,0 +1,2 @@
+#contains namenode details Name; IP; port
+NameNode;localhost;9090

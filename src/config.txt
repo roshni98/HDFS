@@ -1,0 +1,6 @@
+// Configurable Parameters for HDFS: Replication Factor = <# of DataNode copies>, Block Size = <Size in Bytes>, Heartbeat = <Time in seconds>, Block Report Interval = <Time in seconds>, Dead DataNode Time = <Time in seconds>
+Replication Factor=2
+Block Size=64000
+Heartbeat=3
+Block Report Interval=10
+Dead DataNode Time=10
