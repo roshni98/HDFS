@@ -6,6 +6,7 @@ option java_package = "com.google.protobuf";
 option java_outer_classname = "getResponseProto";
 
 message getResponse{
- required bytes data = 1;
- required string filename = 2;
+ optional bytes data = 1;
+ optional string filename = 2;
+ required int32 status = 3;
 }

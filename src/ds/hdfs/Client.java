@@ -17,6 +17,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.rmi.registry.Registry;
 import java.rmi.RemoteException;
 import java.util.*;
+import java.util.jar.Attributes.Name;
 
 import javax.sound.sampled.Port;
 
@@ -42,11 +43,8 @@ public class Client {
     public IDataNode GetDNStub(String Name, String IP, int Port) {
         while (true) {
             try {
-                System.out.println(Name);
-                System.out.println(Port);
                 Registry registry = LocateRegistry.getRegistry(IP, Port);
-                System.out.println(registry);
-                IDataNode stub = (IDataNode) registry.lookup(IP);
+                IDataNode stub = (IDataNode) registry.lookup(Name);
                 return stub;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -57,12 +55,9 @@ public class Client {
 
     public INameNode GetNNStub(String Name, String IP, int Port) {
         while (true) {
-            System.out.println("trying to connect to NameNode");
             try {
-                System.out.println("1");
                 Registry registry = LocateRegistry.getRegistry(IP, Port);
-                System.out.println("2");
-                INameNode stub = (INameNode) registry.lookup(IP);
+                INameNode stub = (INameNode) registry.lookup(Name);
                 System.out.println("NameNode Found");
                 return stub;
             } catch (Exception e) {
@@ -108,10 +103,12 @@ public class Client {
 
             // create a list of DataNode stubs for the DataNodes to write to
             ArrayList<IDataNode> dataNodes = new ArrayList<IDataNode>();
+            ArrayList<String> dataNodeNames = new ArrayList<String>();
             int numDataNodes = assignBlockResponse.getDataNodesCount();
             for (int i = 0; i < numDataNodes; i++) {
                 PutProto.AssignBlockNameNodeResponse.DataNode dn = assignBlockResponse.getDataNodes(i);
                 dataNodes.add(GetDNStub(dn.getName(), dn.getIp(), dn.getPort()));
+                dataNodeNames.add(dn.getName());
                 System.out.println(dataNodes.get(i));
             }
 
@@ -135,21 +132,33 @@ public class Client {
                     writeBlockRequest.setFileName(Filename);
 
                     // receive response from DataNode if write to block was successful or not
-                    PutProto.WriteBlockDataNodeResponse writeBlockResponse = PutProto.WriteBlockDataNodeResponse
-                            .parseFrom(dn.writeBlock(writeBlockRequest.build().toByteArray()));
-                    System.out.println(writeBlockResponse);
-                    boolean success = writeBlockResponse.getIsSuccessful();
-                    if (success) {
-                        System.out.println(
-                                "Block successfully written to " + assignBlockResponse.getDataNodes(i).getName());
-                    } else {
-                        System.out.println(
-                                "Warning, block was not written to " + assignBlockResponse.getDataNodes(i).getName());
+                    try {
+                        PutProto.WriteBlockDataNodeResponse writeBlockResponse = PutProto.WriteBlockDataNodeResponse
+                                .parseFrom(dn.writeBlock(writeBlockRequest.build().toByteArray()));
+                        System.out.println(writeBlockResponse);
+                        boolean success = writeBlockResponse.getIsSuccessful();
+                        // if successful, tell the client
+                        if (success) {
+                            System.out.println("Block: " + blockNumber + " - " + Filename + " successfully written to "
+                                    + dataNodeNames.get(i));
+                        }
+                        // if unsuccessful, issue a warning
+                        else {
+                            System.out.println("Warning, " + "Block: " + blockNumber + " - " + Filename
+                                    + " was not written to " + dataNodeNames.get(i));
+                        }
+                    }
+                    // inform the user of any DataNode crashes
+                    catch (Exception e) {
+                        e.printStackTrace();
+                        System.out.println("Warning, " + dataNodeNames.get(i)
+                                + " crashed during write. Will continue writing to other DataNodes");
+                        dataNodes.remove(i);
+                        dataNodeNames.remove(i);
                     }
 
                 }
                 blockNumber++;
-
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -159,22 +168,33 @@ public class Client {
     }
 
     public void GetFile(String FileName) {
+        // new file input strem for end result
         FileOutputStream fileOutputStream = null;
         try {
-            File file = new File("output/" + FileName);
-            file.getParentFile().mkdirs();
-            file.createNewFile();
-            fileOutputStream = new FileOutputStream(file);
-            // System.out.println("here1");
+            // create a get request to retrieve the data (in bytes) for the file being
+            // requested
             getRequestProto.getRequest.Builder gRequest = getRequestProto.getRequest.newBuilder();
-            // System.out.println("here2");
             gRequest.setFilename(FileName);
-            // System.out.println("here3");
+
+            // retrieve the response from the NameNode
             getResponseProto.getResponse gResponse = getResponseProto.getResponse
                     .parseFrom(this.NNStub.getBlockLocations(gRequest.build().toByteArray()));
-            // System.out.println("here4");
-            fileOutputStream.write(gResponse.getData().toByteArray());
-            // System.out.println("here5");
+
+            // File was read was unsuccessful
+            if (gResponse.getStatus() == -1) {
+                System.out.println("DataNodes are unavailable for reading");
+            } else if (gResponse.getStatus() == -2) {
+                System.out.println("File does not exist.");
+            }
+            // file read successful. store the bytes in the output directory
+            else {
+                System.out.println(FileName + " was successfully read");
+                File file = new File("output/" + FileName);
+                file.getParentFile().mkdirs();
+                file.createNewFile();
+                fileOutputStream = new FileOutputStream(file);
+                fileOutputStream.write(gResponse.getData().toByteArray());
+            }
         } catch (Exception e) {
             System.out.println("Error getting file:" + e);
         } finally {
@@ -189,8 +209,9 @@ public class Client {
     }
 
     public void List() {
-        System.out.println("Going to get list of files in HDFS");
+        System.out.println("Getting list of files in HDFS");
         try {
+            // retrieve list of files available in HDFS and print them out
             byte[] listFilesBytes = NNStub.list(null);
             ListProto.ListFilesResponse listFilesResponse = ListProto.ListFilesResponse.parseFrom(listFilesBytes);
             List<ListProto.ListFilesResponse.File> files = listFilesResponse.getFilesList();
@@ -208,11 +229,14 @@ public class Client {
         // To read config file and Connect to NameNode
         // Intitalize the Client
         System.out.println("Started a Client");
+
         // Read NameNode properties from the NameNode config file
         File nameNodeConfig = new File("src/nn_config.txt");
         BufferedReader br = new BufferedReader(new FileReader(nameNodeConfig));
         String currLine = br.readLine();
         currLine = br.readLine();
+
+        // for localhost
         String[] nameNodeProperties = currLine.split(";");
         String nameNodeName = nameNodeProperties[0];
         String nameNodeIP = nameNodeProperties[1];
@@ -220,6 +244,7 @@ public class Client {
         System.out.println(nameNodeName + ", " + nameNodeIP + ", " + nameNodePort);
         Client Me = new Client(nameNodeName, nameNodeIP, nameNodePort);
 
+        // read the buffer size from the configuration file
         File config = new File("src/config.txt");
         br = new BufferedReader(new FileReader(config));
         currLine = br.readLine();

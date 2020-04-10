@@ -9,6 +9,7 @@ import com.google.protobuf.getRequestProto;
 import com.google.protobuf.getResponseProto;
 import com.google.protobuf.ReadRequestProto;
 import com.google.protobuf.ReadResponseProto;
+import com.google.protobuf.RecoverDataNodeProto;
 import java.rmi.registry.Registry;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.RemoteException;
@@ -44,7 +45,7 @@ public class DataNode extends Thread implements IDataNode {
     public static int heartbeatInterval = 3;
     public static int blockReportInterval = 5;
 
-    HashMap<String, ArrayList<Integer>> allFiles;
+    public static HashMap<String, ArrayList<Integer>> allFiles;
 
     /* Creates a DataNode Object of the fields listed above */
     public DataNode() {
@@ -52,40 +53,27 @@ public class DataNode extends Thread implements IDataNode {
         allFiles = new HashMap<>();
     }
 
-    /* IGNORE THIS METHOD */
-    public static void appendtoFile(String Filename, String Line) {
-        BufferedWriter bw = null;
+    // /* IGNORE THIS METHOD */
+    // public static void appendtoFile(String Filename, String Line) {
+    // BufferedWriter bw = null;
 
-        // try {
-        // //append
-        // }
-        // catch (IOException ioe)
-        // {
-        // ioe.printStackTrace();
-        // }
-        // finally
-        // { // always close the file
-        // if (bw != null) try {
-        // bw.close();
-        // } catch (IOException ioe2) {
-        // }
-        // }
-
-    }
+    // }
 
     public byte[] readBlock(byte[] Inp) {
-        // unserialize the byte array to proto object
-        // unserialize the byte array to proto object
         ReadResponseProto.ReadResponse.Builder readResponse = ReadResponseProto.ReadResponse.newBuilder();
-
         try {
+            // process the read request from the client to get a certain block
             ReadRequestProto.ReadRequest readRequest = ReadRequestProto.ReadRequest.parseFrom(Inp);
             String filename = this.MyName + "/" + readRequest.getBlockNumber() + " - " + readRequest.getFilename();
             File file = new File(filename);
-            System.out.println("Created File to store:" + filename);
+            System.out.println("Requesting Block: " + filename);
+
+            // convert the file contents to a byte array
             byte fileContent[] = new byte[(int) file.length()];
             FileInputStream fs = new FileInputStream(file);
             fs.read(fileContent);
+
+            // send data back to the NameNode as bytes
             readResponse.setData(ByteString.copyFrom(fileContent));
             readResponse.setFilename(readRequest.getFilename());
             return readResponse.build().toByteArray();
@@ -102,7 +90,6 @@ public class DataNode extends Thread implements IDataNode {
     public byte[] writeBlock(byte[] Inp) {
         // unserialize the byte array to proto object
         try {
-            // System.out.println("Client called writeBlock");
 
             // receive block number, filename, and data to write in this block from the
             // client
@@ -118,6 +105,7 @@ public class DataNode extends Thread implements IDataNode {
             }
             this.allFiles.get(fileName).add(Integer.valueOf(blockNumber));
 
+            // create a new block file in the DataNode folder
             String path = this.MyName + "/" + blockNumber + " - " + fileName;
             File file = new File(path);
             file.getParentFile().mkdirs();
@@ -154,7 +142,6 @@ public class DataNode extends Thread implements IDataNode {
         Iterator<String> it = this.allFiles.keySet().iterator();
         while (it.hasNext()) {
             String key = it.next();
-            // System.out.println(key);
             BlockReportProto.BlockReport.ListBlocks.Builder listBlocks = BlockReportProto.BlockReport.ListBlocks
                     .newBuilder();
             listBlocks.addAllBlockNumber(this.allFiles.get(key));
@@ -202,10 +189,13 @@ public class DataNode extends Thread implements IDataNode {
         String currLine = br.readLine();
         currLine = br.readLine();
         String[] dataNodeProperties = currLine.split(";");
-
-        int id = Integer.parseInt(System.getenv(dataNodeProperties[0]));
-        String dataNodeIp = System.getenv(dataNodeProperties[1]);
-        int portNum = Integer.parseInt(System.getenv(dataNodeProperties[2]));
+        System.out.println(dataNodeProperties[0]);
+        int id = Integer.parseInt(dataNodeProperties[0]);
+        String dataNodeIp = dataNodeProperties[1];
+        int portNum = Integer.parseInt(dataNodeProperties[2]);
+        // int id = Integer.parseInt(System.getenv(dataNodeProperties[0]));
+        // String dataNodeIp = System.getenv(dataNodeProperties[1]);
+        // int portNum = Integer.parseInt(System.getenv(dataNodeProperties[2]));
         String dataNodeName = "DataNode" + (id + 1);
 
         // Define a new DataNode object called Me
@@ -223,12 +213,13 @@ public class DataNode extends Thread implements IDataNode {
         currLine = br.readLine();
         currLine = br.readLine();
         String[] nameNodeProperties = currLine.split(";");
-        String nameNodeName = System.getenv(nameNodeProperties[0]);
-        String nameNodeIP = System.getenv(nameNodeProperties[1]);
-        int nameNodePort = Integer.parseInt(System.getenv(nameNodeProperties[2]));
-        // String nameNodeName = nameNodeProperties[0];
-        // String nameNodeIP = nameNodeProperties[1];
-        // int nameNodePort = Integer.parseInt(nameNodeProperties[2]);
+        // String nameNodeName = System.getenv(nameNodeProperties[0]);
+        // String nameNodeIP = System.getenv(nameNodeProperties[1]);
+        // int nameNodePort = Integer.parseInt(System.getenv(nameNodeProperties[2]));
+        String nameNodeName = nameNodeProperties[0];
+        String nameNodeIP = nameNodeProperties[1];
+        int nameNodePort = Integer.parseInt(nameNodeProperties[2]);
+
         // Create the NameNode stub
         INameNode nameNode = Me.GetNNStub(nameNodeName, nameNodeIP, nameNodePort);
 
@@ -258,7 +249,20 @@ public class DataNode extends Thread implements IDataNode {
             public void run() {
                 while (true) {
                     try {
-                        nameNode.heartBeat(protoMsg.build().toByteArray());
+                        RecoverDataNodeProto.RecoverDataNode recoverResponse = RecoverDataNodeProto.RecoverDataNode
+                                .parseFrom(nameNode.heartBeat(protoMsg.build().toByteArray()));
+                        int status = recoverResponse.getStatus();
+                        if (status == 1) {
+                            Map<String, RecoverDataNodeProto.RecoverDataNode.ListBlocks> files = recoverResponse
+                                    .getFilesMap();
+                            Iterator<String> it = files.keySet().iterator();
+                            while (it.hasNext()) {
+                                String key = it.next();
+                                ArrayList<Integer> blocks = new ArrayList<Integer>(files.get(key).getBlockNumberList());
+                                allFiles.put(key, blocks);
+                            }
+                            System.out.println(allFiles.toString());
+                        }
                         Thread.sleep(heartbeatInterval * 1000);
                     } catch (Exception e) {
                         e.printStackTrace();

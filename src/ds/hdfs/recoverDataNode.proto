@@ -1,0 +1,14 @@
+syntax = "proto2";
+
+package ds.hdfs;
+
+option java_package = "com.google.protobuf";
+option java_outer_classname = "RecoverDataNodeProto";
+
+message RecoverDataNode{
+  message ListBlocks {
+    repeated int32 blockNumber = 1;
+  }
+  map<string, ListBlocks> files = 1; 
+  required int32 status = 3;
+}

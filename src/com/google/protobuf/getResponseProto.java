@@ -19,32 +19,43 @@ public final class getResponseProto {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>required bytes data = 1;</code>
+     * <code>optional bytes data = 1;</code>
      * @return Whether the data field is set.
      */
     boolean hasData();
     /**
-     * <code>required bytes data = 1;</code>
+     * <code>optional bytes data = 1;</code>
      * @return The data.
      */
     com.google.protobuf.ByteString getData();
 
     /**
-     * <code>required string filename = 2;</code>
+     * <code>optional string filename = 2;</code>
      * @return Whether the filename field is set.
      */
     boolean hasFilename();
     /**
-     * <code>required string filename = 2;</code>
+     * <code>optional string filename = 2;</code>
      * @return The filename.
      */
     java.lang.String getFilename();
     /**
-     * <code>required string filename = 2;</code>
+     * <code>optional string filename = 2;</code>
      * @return The bytes for filename.
      */
     com.google.protobuf.ByteString
         getFilenameBytes();
+
+    /**
+     * <code>required int32 status = 3;</code>
+     * @return Whether the status field is set.
+     */
+    boolean hasStatus();
+    /**
+     * <code>required int32 status = 3;</code>
+     * @return The status.
+     */
+    int getStatus();
   }
   /**
    * Protobuf type {@code ds.hdfs.getResponse}
@@ -105,6 +116,11 @@ public final class getResponseProto {
               filename_ = bs;
               break;
             }
+            case 24: {
+              bitField0_ |= 0x00000004;
+              status_ = input.readInt32();
+              break;
+            }
             default: {
               if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -141,14 +157,14 @@ public final class getResponseProto {
     public static final int DATA_FIELD_NUMBER = 1;
     private com.google.protobuf.ByteString data_;
     /**
-     * <code>required bytes data = 1;</code>
+     * <code>optional bytes data = 1;</code>
      * @return Whether the data field is set.
      */
     public boolean hasData() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
-     * <code>required bytes data = 1;</code>
+     * <code>optional bytes data = 1;</code>
      * @return The data.
      */
     public com.google.protobuf.ByteString getData() {
@@ -158,14 +174,14 @@ public final class getResponseProto {
     public static final int FILENAME_FIELD_NUMBER = 2;
     private volatile java.lang.Object filename_;
     /**
-     * <code>required string filename = 2;</code>
+     * <code>optional string filename = 2;</code>
      * @return Whether the filename field is set.
      */
     public boolean hasFilename() {
       return ((bitField0_ & 0x00000002) != 0);
     }
     /**
-     * <code>required string filename = 2;</code>
+     * <code>optional string filename = 2;</code>
      * @return The filename.
      */
     public java.lang.String getFilename() {
@@ -183,7 +199,7 @@ public final class getResponseProto {
       }
     }
     /**
-     * <code>required string filename = 2;</code>
+     * <code>optional string filename = 2;</code>
      * @return The bytes for filename.
      */
     public com.google.protobuf.ByteString
@@ -200,6 +216,23 @@ public final class getResponseProto {
       }
     }
 
+    public static final int STATUS_FIELD_NUMBER = 3;
+    private int status_;
+    /**
+     * <code>required int32 status = 3;</code>
+     * @return Whether the status field is set.
+     */
+    public boolean hasStatus() {
+      return ((bitField0_ & 0x00000004) != 0);
+    }
+    /**
+     * <code>required int32 status = 3;</code>
+     * @return The status.
+     */
+    public int getStatus() {
+      return status_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -207,11 +240,7 @@ public final class getResponseProto {
       if (isInitialized == 1) return true;
       if (isInitialized == 0) return false;
 
-      if (!hasData()) {
-        memoizedIsInitialized = 0;
-        return false;
-      }
-      if (!hasFilename()) {
+      if (!hasStatus()) {
         memoizedIsInitialized = 0;
         return false;
       }
@@ -228,6 +257,9 @@ public final class getResponseProto {
       if (((bitField0_ & 0x00000002) != 0)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, filename_);
       }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        output.writeInt32(3, status_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -243,6 +275,10 @@ public final class getResponseProto {
       }
       if (((bitField0_ & 0x00000002) != 0)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, filename_);
+      }
+      if (((bitField0_ & 0x00000004) != 0)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(3, status_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -269,6 +305,11 @@ public final class getResponseProto {
         if (!getFilename()
             .equals(other.getFilename())) return false;
       }
+      if (hasStatus() != other.hasStatus()) return false;
+      if (hasStatus()) {
+        if (getStatus()
+            != other.getStatus()) return false;
+      }
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -287,6 +328,10 @@ public final class getResponseProto {
       if (hasFilename()) {
         hash = (37 * hash) + FILENAME_FIELD_NUMBER;
         hash = (53 * hash) + getFilename().hashCode();
+      }
+      if (hasStatus()) {
+        hash = (37 * hash) + STATUS_FIELD_NUMBER;
+        hash = (53 * hash) + getStatus();
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -425,6 +470,8 @@ public final class getResponseProto {
         bitField0_ = (bitField0_ & ~0x00000001);
         filename_ = "";
         bitField0_ = (bitField0_ & ~0x00000002);
+        status_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000004);
         return this;
       }
 
@@ -461,6 +508,10 @@ public final class getResponseProto {
           to_bitField0_ |= 0x00000002;
         }
         result.filename_ = filename_;
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.status_ = status_;
+          to_bitField0_ |= 0x00000004;
+        }
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -518,6 +569,9 @@ public final class getResponseProto {
           filename_ = other.filename_;
           onChanged();
         }
+        if (other.hasStatus()) {
+          setStatus(other.getStatus());
+        }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
         return this;
@@ -525,10 +579,7 @@ public final class getResponseProto {
 
       @java.lang.Override
       public final boolean isInitialized() {
-        if (!hasData()) {
-          return false;
-        }
-        if (!hasFilename()) {
+        if (!hasStatus()) {
           return false;
         }
         return true;
@@ -556,21 +607,21 @@ public final class getResponseProto {
 
       private com.google.protobuf.ByteString data_ = com.google.protobuf.ByteString.EMPTY;
       /**
-       * <code>required bytes data = 1;</code>
+       * <code>optional bytes data = 1;</code>
        * @return Whether the data field is set.
        */
       public boolean hasData() {
         return ((bitField0_ & 0x00000001) != 0);
       }
       /**
-       * <code>required bytes data = 1;</code>
+       * <code>optional bytes data = 1;</code>
        * @return The data.
        */
       public com.google.protobuf.ByteString getData() {
         return data_;
       }
       /**
-       * <code>required bytes data = 1;</code>
+       * <code>optional bytes data = 1;</code>
        * @param value The data to set.
        * @return This builder for chaining.
        */
@@ -584,7 +635,7 @@ public final class getResponseProto {
         return this;
       }
       /**
-       * <code>required bytes data = 1;</code>
+       * <code>optional bytes data = 1;</code>
        * @return This builder for chaining.
        */
       public Builder clearData() {
@@ -596,14 +647,14 @@ public final class getResponseProto {
 
       private java.lang.Object filename_ = "";
       /**
-       * <code>required string filename = 2;</code>
+       * <code>optional string filename = 2;</code>
        * @return Whether the filename field is set.
        */
       public boolean hasFilename() {
         return ((bitField0_ & 0x00000002) != 0);
       }
       /**
-       * <code>required string filename = 2;</code>
+       * <code>optional string filename = 2;</code>
        * @return The filename.
        */
       public java.lang.String getFilename() {
@@ -621,7 +672,7 @@ public final class getResponseProto {
         }
       }
       /**
-       * <code>required string filename = 2;</code>
+       * <code>optional string filename = 2;</code>
        * @return The bytes for filename.
        */
       public com.google.protobuf.ByteString
@@ -638,7 +689,7 @@ public final class getResponseProto {
         }
       }
       /**
-       * <code>required string filename = 2;</code>
+       * <code>optional string filename = 2;</code>
        * @param value The filename to set.
        * @return This builder for chaining.
        */
@@ -653,7 +704,7 @@ public final class getResponseProto {
         return this;
       }
       /**
-       * <code>required string filename = 2;</code>
+       * <code>optional string filename = 2;</code>
        * @return This builder for chaining.
        */
       public Builder clearFilename() {
@@ -663,7 +714,7 @@ public final class getResponseProto {
         return this;
       }
       /**
-       * <code>required string filename = 2;</code>
+       * <code>optional string filename = 2;</code>
        * @param value The bytes for filename to set.
        * @return This builder for chaining.
        */
@@ -674,6 +725,43 @@ public final class getResponseProto {
   }
   bitField0_ |= 0x00000002;
         filename_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int status_ ;
+      /**
+       * <code>required int32 status = 3;</code>
+       * @return Whether the status field is set.
+       */
+      public boolean hasStatus() {
+        return ((bitField0_ & 0x00000004) != 0);
+      }
+      /**
+       * <code>required int32 status = 3;</code>
+       * @return The status.
+       */
+      public int getStatus() {
+        return status_;
+      }
+      /**
+       * <code>required int32 status = 3;</code>
+       * @param value The status to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStatus(int value) {
+        bitField0_ |= 0x00000004;
+        status_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>required int32 status = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearStatus() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        status_ = 0;
         onChanged();
         return this;
       }
@@ -744,10 +832,10 @@ public final class getResponseProto {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\031ds/hdfs/getResponse.proto\022\007ds.hdfs\"-\n\013" +
-      "getResponse\022\014\n\004data\030\001 \002(\014\022\020\n\010filename\030\002 " +
-      "\002(\tB\'\n\023com.google.protobufB\020getResponseP" +
-      "roto"
+      "\n\031ds/hdfs/getResponse.proto\022\007ds.hdfs\"=\n\013" +
+      "getResponse\022\014\n\004data\030\001 \001(\014\022\020\n\010filename\030\002 " +
+      "\001(\t\022\016\n\006status\030\003 \002(\005B\'\n\023com.google.protob" +
+      "ufB\020getResponseProto"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -758,7 +846,7 @@ public final class getResponseProto {
     internal_static_ds_hdfs_getResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_ds_hdfs_getResponse_descriptor,
-        new java.lang.String[] { "Data", "Filename", });
+        new java.lang.String[] { "Data", "Filename", "Status", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
