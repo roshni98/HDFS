@@ -1,7 +1,7 @@
-version: "3.7"
+version: '3.7'
 services:
   namenode:
-    image: roshni/distributed_hdfs
+    image: minniemice18/distributed_hdfs
     volumes:
       - ./src:/src
     ports:
@@ -11,59 +11,75 @@ services:
     environment:
       - NAMENODE_NAME=NameNode
       - NAMENODE_PORT=9090
-      - NAMENODE_IP=namenode
-    entrypoint: run_docker.sh -n
+      - NAMENODE_IP=namenode 
+    entrypoint: /app/run_docker.sh -n
     tty: true
 
   dataNode1:
-    image: roshni/distributed_hdfs
-    volumes:
-      - ./src:/src
+    image: minniemice18/distributed_hdfs
     networks:
       - hadoopnet
-    entrypoint: bash -c run_docker.sh -d
     tty: true
+    entrypoint: /app/run_docker.sh -d
     environment:
       - NODE_NAME=DataNode1
       - NODE_ID=0
       - NODE_PORT=9092
       - NAMENODE_IP=namenode
+      - NODE_IP=dataNode1
       - NAMENODE_PORT=9090
       - NAMENODE_NAME=NameNode
     ports:
       - "9092:9092"
+    depends_on:
+      - namenode
 
   dataNode2:
-    image: roshni/distributed_hdfs
+    image: minniemice18/distributed_hdfs
     networks:
       - hadoopnet
     tty: true
-    entrypoint: run_docker.sh -d
+    entrypoint: /app/run_docker.sh -d
     environment:
       - NODE_NAME=DataNode2
       - NODE_ID=1
       - NODE_PORT=9093
       - NAMENODE_IP=namenode
+      - NODE_IP=dataNode2
       - NAMENODE_PORT=9090
       - NAMENODE_NAME=NameNode
     ports:
       - "9093:9093"
+    depends_on:
+      - namenode
 
   dataNode3:
-    image: roshni/distributed_hdfs
+    image: minniemice18/distributed_hdfs
     networks:
       - hadoopnet
     tty: true
-    entrypoint: run_docker.sh -d
+    entrypoint: /app/run_docker.sh -d
     environment:
       - NODE_NAME=DataNode3
       - NODE_ID=2
+      - NODE_IP=dataNode3
       - NODE_PORT=9094
       - NAMENODE_IP=namenode
       - NAMENODE_PORT=9090
       - NAMENODE_NAME=NameNode
     ports:
       - "9094:9094"
+    depends_on:
+      - namenode
+  # client:
+  #   image: roshni/distributed_hdfs2
+  #   networks:
+  #     - hadoopnet
+  #   tty: true
+  #   ports:
+  #     - "9095:9095"
+  #   depends_on:
+  #     - namenode
 networks:
   hadoopnet:
     name: hadoopnet
