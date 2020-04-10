@@ -1,2 +1,2 @@
 #contains namenode details Name; IP; port
-NAMENODE_NAME;NAMENODE_IP;NAMENODE_PORT
+NameNode;localhost;9090

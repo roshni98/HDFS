@@ -36,7 +36,7 @@ public class Client {
 
     public Client(String name, String IP, int port) {
 
-        this.NNStub = GetNNStub(name, null, port);
+        this.NNStub = GetNNStub(name, IP, port);
 
     }
 
@@ -191,6 +191,7 @@ public class Client {
                 System.out.println(FileName + " was successfully read");
                 File file = new File("output/" + FileName);
                 file.getParentFile().mkdirs();
+                System.out.println(file.getAbsolutePath());
                 file.createNewFile();
                 fileOutputStream = new FileOutputStream(file);
                 fileOutputStream.write(gResponse.getData().toByteArray());
@@ -231,21 +232,25 @@ public class Client {
         System.out.println("Started a Client");
 
         // Read NameNode properties from the NameNode config file
-        File nameNodeConfig = new File("src/nn_config.txt");
+        File nameNodeConfig = new File("nn_config.txt");
         BufferedReader br = new BufferedReader(new FileReader(nameNodeConfig));
         String currLine = br.readLine();
         currLine = br.readLine();
 
         // for localhost
         String[] nameNodeProperties = currLine.split(";");
-        String nameNodeName = nameNodeProperties[0];
-        String nameNodeIP = nameNodeProperties[1];
-        int nameNodePort = Integer.parseInt(nameNodeProperties[2]);
+        // String nameNodeName = nameNodeProperties[0];
+        // String nameNodeIP = nameNodeProperties[1];
+        // int nameNodePort = Integer.parseInt(nameNodeProperties[2]);
+        String nameNodeName = System.getenv(nameNodeProperties[0]);
+        String nameNodeIP = System.getenv(nameNodeProperties[1]);
+        int nameNodePort = Integer.parseInt(System.getenv(nameNodeProperties[2]));
+
         System.out.println(nameNodeName + ", " + nameNodeIP + ", " + nameNodePort);
         Client Me = new Client(nameNodeName, nameNodeIP, nameNodePort);
 
         // read the buffer size from the configuration file
-        File config = new File("src/config.txt");
+        File config = new File("config.txt");
         br = new BufferedReader(new FileReader(config));
         currLine = br.readLine();
         currLine = br.readLine();

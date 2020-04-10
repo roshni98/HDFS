@@ -20,4 +20,13 @@ then
     cd /app/src
     javac -cp .:protobuf-java-3.11.1.jar ./ds/hdfs/NameNode.java
     java -cp .:protobuf-java-3.11.1.jar  ds.hdfs.NameNode
+
+elif [[ $1 = '-i' ]]
+then
+    cd /app/src
+    export NAMENODE_NAME="NameNode"
+    export NAMENODE_IP="namenode"
+    export NAMENODE_PORT="9090"
+    javac -cp .:protobuf-java-3.11.1.jar  ./ds/hdfs/Client.java
+    java -cp .:protobuf-java-3.11.1.jar ds.hdfs.Client
 fi

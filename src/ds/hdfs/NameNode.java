@@ -459,26 +459,25 @@ public class NameNode implements INameNode {
 	public static void main(String[] args) throws InterruptedException, NumberFormatException, IOException {
 		try {
 			// Read NameNode properties from the NameNode config file
-			File nameNodeConfig = new File("src/nn_config.txt");
+			File nameNodeConfig = new File("nn_config.txt");
 			BufferedReader br = new BufferedReader(new FileReader(nameNodeConfig));
 			String currLine = br.readLine();
 			currLine = br.readLine();
 			String[] nameNodeProperties = currLine.split(";");
 
 			// for Docker
-			// System.out.println(System.getProperty("user.dir"));
-			// String nameNodeName = System.getenv(nameNodeProperties[0]);
-			// String nameNodeIP = System.getenv(nameNodeProperties[1]);
-			// int nameNodePort = Integer.parseInt(System.getenv(nameNodeProperties[2]));
+			String nameNodeName = System.getenv(nameNodeProperties[0]);
+			String nameNodeIP = System.getenv(nameNodeProperties[1]);
+			int nameNodePort = Integer.parseInt(System.getenv(nameNodeProperties[2]));
 
 			// for localhost
-			String nameNodeName = nameNodeProperties[0];
-			String nameNodeIP = nameNodeProperties[1];
-			int nameNodePort = Integer.parseInt(nameNodeProperties[2]);
+			// String nameNodeName = nameNodeProperties[0];
+			// String nameNodeIP = nameNodeProperties[1];
+			// int nameNodePort = Integer.parseInt(nameNodeProperties[2]);
 			System.out.println(nameNodeName + ", " + nameNodeIP + ", " + nameNodePort);
 
 			// read replicationFactor and DataNode timeout time from the config file
-			File config = new File("src/config.txt");
+			File config = new File("config.txt");
 			br = new BufferedReader(new FileReader(config));
 			currLine = br.readLine();
 			currLine = br.readLine();
@@ -496,7 +495,7 @@ public class NameNode implements INameNode {
 
 			// create a NameNode stub and bind it to the Java RMI registry
 			LocateRegistry.createRegistry(nameNodePort);
-			NameNode obj = new NameNode(nameNodeIP, 9000, nameNodeName);
+			NameNode obj = new NameNode(nameNodeIP, nameNodePort, nameNodeName);
 			INameNode stub = (INameNode) UnicastRemoteObject.exportObject(obj, 0);
 			Registry registry = LocateRegistry.getRegistry(nameNodePort);
 			registry.bind(nameNodeName, stub);

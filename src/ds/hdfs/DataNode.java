@@ -183,16 +183,19 @@ public class DataNode extends Thread implements IDataNode {
     // InvalidProtocolBufferException,
     public static void main(String args[]) throws IOException {
 
-        File dataNodeConfig = new File("src/dn_config.txt");
+        File dataNodeConfig = new File("dn_config.txt");
         BufferedReader br = new BufferedReader(new FileReader(dataNodeConfig));
 
         String currLine = br.readLine();
         currLine = br.readLine();
         String[] dataNodeProperties = currLine.split(";");
         System.out.println(dataNodeProperties[0]);
-        int id = Integer.parseInt(dataNodeProperties[0]);
-        String dataNodeIp = dataNodeProperties[1];
-        int portNum = Integer.parseInt(dataNodeProperties[2]);
+        int id = Integer.parseInt(System.getenv(dataNodeProperties[0]));
+        String dataNodeIp = System.getenv(dataNodeProperties[1]) == null ? "localhost" : System.getenv(dataNodeProperties[1]);
+        int portNum = Integer.parseInt(System.getenv(dataNodeProperties[2]));
+        // int id = Integer.parseInt(dataNodeProperties[0]);
+        // String dataNodeIp = dataNodeProperties[1];
+        // int portNum = Integer.parseInt(dataNodeProperties[2]);
         // int id = Integer.parseInt(System.getenv(dataNodeProperties[0]));
         // String dataNodeIp = System.getenv(dataNodeProperties[1]);
         // int portNum = Integer.parseInt(System.getenv(dataNodeProperties[2]));
@@ -208,17 +211,17 @@ public class DataNode extends Thread implements IDataNode {
         Me.MyIP = dataNodeIp;
 
         // Read NameNode properties from the NameNode config file
-        File nameNodeConfig = new File("src/nn_config.txt");
+        File nameNodeConfig = new File("nn_config.txt");
         br = new BufferedReader(new FileReader(nameNodeConfig));
         currLine = br.readLine();
         currLine = br.readLine();
         String[] nameNodeProperties = currLine.split(";");
-        // String nameNodeName = System.getenv(nameNodeProperties[0]);
-        // String nameNodeIP = System.getenv(nameNodeProperties[1]);
-        // int nameNodePort = Integer.parseInt(System.getenv(nameNodeProperties[2]));
-        String nameNodeName = nameNodeProperties[0];
-        String nameNodeIP = nameNodeProperties[1];
-        int nameNodePort = Integer.parseInt(nameNodeProperties[2]);
+        String nameNodeName = System.getenv(nameNodeProperties[0]);
+        String nameNodeIP = System.getenv(nameNodeProperties[1]);
+        int nameNodePort = Integer.parseInt(System.getenv(nameNodeProperties[2]));
+        // String nameNodeName = nameNodeProperties[0];
+        // String nameNodeIP = nameNodeProperties[1];
+        // int nameNodePort = Integer.parseInt(nameNodeProperties[2]);
 
         // Create the NameNode stub
         INameNode nameNode = Me.GetNNStub(nameNodeName, nameNodeIP, nameNodePort);
@@ -231,7 +234,7 @@ public class DataNode extends Thread implements IDataNode {
         protoMsg.setId(id);
 
         // Get heartbeat and blockreport intervals from config
-        File config = new File("src/config.txt");
+        File config = new File("config.txt");
         br = new BufferedReader(new FileReader(config));
         currLine = br.readLine();
         currLine = br.readLine();
